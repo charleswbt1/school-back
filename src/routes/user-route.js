@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const UserRepository = require('../repositories/user-repository.js');
+const UserRepository = require('../repositories/repository.js');
 
 router.get('/all', async (req, res) => {
     let result = await UserRepository.getAllUsers();

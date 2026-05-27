@@ -27,17 +27,23 @@ router.get('/student/:id', (req, res) => {
         total_payments: 10,
         paid_payments: 5,
         status: 'curso',
-        history: [{
-            module: 'Modulo 1',
-            topic: 'Algebra I',
-            date: '2026-05-01'
-        }],
-        test: [{
-            module: 'Modulo 1',
-            date: '2026-05-01',
-            grading: 80,
-            status: 'aprobado',
-            attempt: 2
+        modules: [{
+            name: 'Módulo 1',
+            exam: "",
+            topics: [{
+                name: 'Algebra I',
+                description: 'Ecuaciones',
+                multimedia: "",
+                state: 'aprobado'
+            }]
+        }, {
+            name: 'Módulo 2',
+            exam: "",
+            topics: [{
+                name: 'Algebra II',
+                description: 'Derivadas',
+                multimedia: ""
+            }]
         }],
         payments: [{
             date: '2026-05-01',
