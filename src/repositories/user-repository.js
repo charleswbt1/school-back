@@ -11,6 +11,7 @@ class UserRepository {
     }
 
     async getUserById(id) {
+        const db = getDb();
         const userRef = db.collection('users').doc(id);
         const doc = await userRef.get();
         if (!doc.exists) {
@@ -20,6 +21,7 @@ class UserRepository {
     }
 
     async createUser(userData) {
+        const db = getDb();
         const usersRef = db.collection('users');
         const newUserRef = await usersRef.add(userData);
         const newUser = await newUserRef.get();
@@ -27,6 +29,7 @@ class UserRepository {
     }
 
     async updateUser(id, userData) {
+        const db = getDb();
         const userRef = db.collection('users').doc(id);
         await userRef.update(userData);
         const updatedUser = await userRef.get();
@@ -34,6 +37,7 @@ class UserRepository {
     }
 
     async deleteUser(id) {
+        const db = getDb();
         const userRef = db.collection('users').doc(id);
         await userRef.delete();
         return { message: 'User deleted successfully' };
