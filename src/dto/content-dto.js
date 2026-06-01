@@ -13,10 +13,14 @@ class Topic {
 class Module {
     constructor({
         name,
+        description,
+        qualification,
         exam,
         topics = []
     }) {
         this.name = name;
+        this.description = description;
+        this.qualification = qualification;
         this.exam = exam;
         this.topics = topics.map(
             topic => new Topic(topic)
@@ -26,12 +30,10 @@ class Module {
 
 class ContentRegisterRequest {
     constructor({
-        id,
         name,
         description,
         modules = []
     }) {
-        this.id = id;
         this.name = name;
         this.description = description;
         this.modules = modules.map(

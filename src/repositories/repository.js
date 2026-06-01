@@ -9,6 +9,7 @@ class Repository {
     async getAll(collectionName) {
         const snapshot = await this
             .getCollection(collectionName)
+            .where('state', '==', 'active')
             .get();
         return snapshot.docs.map(doc => ({
             id: doc.id,
@@ -37,14 +38,17 @@ class Repository {
             .toUpperCase();
         const newData = {
             id: `${prefix}_${Date.now()}`,
-            ...data,
+            ...JSON.parse(JSON.stringify(data)),
+            state: 'active',
             createdAt: new Date(),
             updatedAt: new Date()
         };
-        const saveRef = await this
+        const docRef = this
             .getCollection(collectionName)
-            .add(newData);
-        const newDoc = await saveRef.get();
+            .doc(newData.id);
+        await docRef.set(newData);
+
+        const newDoc = await docRef.get();
         return {
             id: newDoc.id,
             ...newDoc.data()
@@ -60,7 +64,7 @@ class Repository {
             throw new Error(`${collectionName} ${id} not found`);
         }
         await ref.update({
-            ...data,
+            ...JSON.parse(JSON.stringify(data)),
             updatedAt: new Date()
         });
         const updatedDoc = await ref.get();
@@ -78,7 +82,7 @@ class Repository {
         if (!doc.exists) {
             throw new Error(`${collectionName} ${id} not found`);
         }
-        await ref.delete();
+        await ref.update({ state: 'inactive' });
         return {
             message: 'Deleted successfully'
         };

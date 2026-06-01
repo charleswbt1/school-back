@@ -1,4 +1,4 @@
-const { getBucket } = require('../config/firebase');
+const { getBucket } = require('./firebase.js');
 
 class StorageUtil {
     static async uploadFile(file, folder = 'uploads') {
@@ -95,6 +95,14 @@ class StorageUtil {
 
             throw error;
         }
+    }
+
+    static formatDates(data) {
+        return {
+            ...data,
+            createdAt: data.createdAt?.toDate?.().toISOString(),
+            updatedAt: data.updatedAt?.toDate?.().toISOString()
+        };
     }
 }
 
