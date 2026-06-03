@@ -55,4 +55,15 @@ router.delete('', async (req, res) => {
     }
 });
 
+
+router.post('/register', async (req, res) => {
+    const { user_id, course_id } = req.body;
+    try {
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 module.exports = router;
