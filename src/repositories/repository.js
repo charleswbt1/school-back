@@ -9,7 +9,6 @@ class Repository {
     async getAll(collectionName) {
         const snapshot = await this
             .getCollection(collectionName)
-            .where('state', '==', 'active')
             .get();
         return snapshot.docs.map(doc => ({
             id: doc.id,

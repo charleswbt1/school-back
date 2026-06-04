@@ -51,8 +51,7 @@ class QueryRepository {
     async getCoursesByUserId(userId) {
         const ref = this
             .getCollection('students')
-            .where('user_id', '==', userId)
-            .where('state', '==', 'active');
+            .where('user_id', '==', userId);
         const snapshot = await ref.get();
         if (snapshot.empty) {
             return [];
@@ -76,6 +75,23 @@ class QueryRepository {
             id: doc.id,
             ...doc.data()
         }));
+    }
+
+    async getStudentByCourseIdAndUserId(courseId, userId) {
+        const ref = this
+            .getCollection('students')
+            .where('course_id', '==', courseId)
+            .where('user_id', '==', userId)
+            .limit(1);
+        const snapshot = await ref.get();
+        if (snapshot.empty) {
+            return null;
+        }
+        const doc = snapshot.docs[0];
+        return {
+            id: doc.id,
+            ...doc.data()
+        };
     }
 }
 module.exports = new QueryRepository();

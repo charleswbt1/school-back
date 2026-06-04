@@ -60,10 +60,18 @@ router.delete('', async (req, res) => {
 router.post('/register', async (req, res) => {
     const { user_id, course_id } = req.body;
     try {
+        const student = await QueryRepository.getStudentByCourseIdAndUserId(course_id, user_id);
+        if (student) {
+            return res.status(201).json({
+                id: student.id,
+                user_id: student.user_id
+            });
+        }
+
         const result = await Repository.getById(user_id, 'users');
         const course = await Repository.getById(course_id, 'courses');
         const content = await Repository.getById(course.content_id, 'contents');
-        const student = await Repository.create(
+        const newStudent = await Repository.create(
             new StudentRegisterRequest({
                 user_id: user_id,
                 course_id: course_id,
@@ -79,8 +87,10 @@ router.post('/register', async (req, res) => {
             }),
             repositoryName
         );
-        res.status(201).json(Utils.formatDates(student));
-
+        res.status(201).json({
+            id: newStudent.id,
+            user_id: newStudent.user_id
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
@@ -90,7 +100,12 @@ router.get('/courses', async (req, res) => {
     try {
         const userId = req.query.user_id;
         const entities = await QueryRepository.getCoursesByUserId(userId);
-        res.status(200).json(entities.map(Utils.formatDates));
+        res.status(200).json(entities.map(entity => ({
+            course_id: entity.course_id,
+            course_name: entity.course_name,
+            id: entity.id,
+            image: entity.image
+        })));
     } catch (error) {
         console.error(error);
         res.status(412).json({ message: error.message });
