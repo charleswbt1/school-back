@@ -67,12 +67,15 @@ router.post('/register', async (req, res) => {
             new StudentRegisterRequest({
                 user_id: user_id,
                 course_id: course_id,
+                image: course.image,
+                course_name: course.name,
                 content: new ContentRegisterRequest(content),
-                totalModules: content.modules.length(),
+                totalModules: content.modules?.length || 0,
                 totalCost: course.cost,
                 modulesCompleted: 0,
                 costCompleted: 0,
-                payments: []
+                payments: [],
+                documents: []
             }),
             repositoryName
         );
