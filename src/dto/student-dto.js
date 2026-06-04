@@ -1,3 +1,5 @@
+const ContentRegisterRequest = require('../dto/content-dto.js');
+
 class Payment {
     constructor({
         amount,
@@ -15,18 +17,18 @@ class StudentRegisterRequest {
         course_id,
         content,
         totalModules,
-        totalPayments,
+        totalCost,
         modulesCompleted,
-        paymentsCompleted,
+        costCompleted,
         payments
     }) {
         this.user_id = user_id;
         this.course_id = course_id;
         this.content = new ContentRegisterRequest(content);
         this.totalModules = totalModules;
-        this.totalPayments = totalPayments;
+        this.totalCost = totalCost;
         this.modulesCompleted = modulesCompleted;
-        this.paymentsCompleted = paymentsCompleted;
+        this.costCompleted = costCompleted;
         this.payments = payments.map(
             payment => new Payment(payment)
         );

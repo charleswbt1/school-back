@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Utils = require('../config/utils.js');
 const Repository = require('../repositories/repository.js');
+const QueryRepository = require('../repositories/query-repository.js');
 const CourseRegisterRequest = require('../dto/course-dto.js');
 
 const repositoryName = 'courses';
@@ -49,6 +50,17 @@ router.delete('', async (req, res) => {
         const id = req.query.id;
         const result = await Repository.delete(id, repositoryName);
         res.status(200).json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(412).json({ message: error.message });
+    }
+});
+
+router.get('/students', async (req, res) => {
+    try {
+        const courseId = req.query.course_id;
+        const entities = await QueryRepository.getStudentsByCourseId(courseId);
+        res.status(200).json(entities.map(Utils.formatDates));
     } catch (error) {
         console.error(error);
         res.status(412).json({ message: error.message });

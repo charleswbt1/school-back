@@ -48,6 +48,34 @@ class QueryRepository {
         };
     }
 
-}
+    async getCoursesByUserId(userId) {
+        const ref = this
+            .getCollection('students')
+            .where('user_id', '==', userId)
+            .where('state', '==', 'active');
+        const snapshot = await ref.get();
+        if (snapshot.empty) {
+            return [];
+        }
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    }
 
+    async getStudentsByCourseId(courseId) {
+        const ref = this
+            .getCollection('students')
+            .where('course_id', '==', courseId)
+            .where('state', '==', 'active');
+        const snapshot = await ref.get();
+        if (snapshot.empty) {
+            return [];
+        }
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    }
+}
 module.exports = new QueryRepository();

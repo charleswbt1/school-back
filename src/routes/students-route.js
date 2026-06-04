@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Utils = require('../config/utils.js');
 const Repository = require('../repositories/repository.js');
+const QueryRepository = require('../repositories/query-repository.js');
 const StudentRegisterRequest = require('../dto/student-dto.js');
+const ContentRegisterRequest = require('../dto/content-dto.js');
 
 const repositoryName = 'students';
 
@@ -55,14 +57,40 @@ router.delete('', async (req, res) => {
     }
 });
 
-
 router.post('/register', async (req, res) => {
     const { user_id, course_id } = req.body;
     try {
+        const result = await Repository.getById(user_id, 'users');
+        const course = await Repository.getById(course_id, 'courses');
+        const content = await Repository.getById(course.content_id, 'contents');
+        const student = await Repository.create(
+            new StudentRegisterRequest({
+                user_id: user_id,
+                course_id: course_id,
+                content: new ContentRegisterRequest(content),
+                totalModules: content.modules.length(),
+                totalCost: course.cost,
+                modulesCompleted: 0,
+                costCompleted: 0,
+                payments: []
+            }),
+            repositoryName
+        );
+        res.status(201).json(Utils.formatDates(student));
 
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
+    }
+});
+router.get('/courses', async (req, res) => {
+    try {
+        const userId = req.query.user_id;
+        const entities = await QueryRepository.getCoursesByUserId(userId);
+        res.status(200).json(entities.map(Utils.formatDates));
+    } catch (error) {
+        console.error(error);
+        res.status(412).json({ message: error.message });
     }
 });
 
