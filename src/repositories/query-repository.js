@@ -77,6 +77,20 @@ class QueryRepository {
         }));
     }
 
+    async getStudentsByAdviserId(adviserId) {
+        const ref = this
+            .getCollection('students')
+            .where('adviser_id', '==', adviserId);
+        const snapshot = await ref.get();
+        if (snapshot.empty) {
+            return [];
+        }
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    }
+
     async getStudentByCourseIdAndUserId(courseId, userId) {
         const ref = this
             .getCollection('students')

@@ -4,6 +4,7 @@ class CourseRegisterRequest {
         description,
         squad_id,
         content_id,
+        adviser_id,
         image,
         cost,
         rvoe,
@@ -14,6 +15,7 @@ class CourseRegisterRequest {
         this.description = description;
         this.squad_id = squad_id;
         this.content_id = content_id;
+        this.adviser_id = adviser_id;
         this.image = image;
         this.cost = cost;
         this.rvoe = rvoe;

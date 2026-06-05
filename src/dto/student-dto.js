@@ -24,6 +24,7 @@ class StudentRegisterRequest {
     constructor({
         user_id,
         course_id,
+        adviser_id,
         image,
         course_name,
         content,
@@ -36,6 +37,7 @@ class StudentRegisterRequest {
     }) {
         this.user_id = user_id;
         this.course_id = course_id;
+        this.adviser_id = adviser_id;
         this.image = image;
         this.course_name = course_name;
         this.content = new ContentRegisterRequest(content);

@@ -75,6 +75,7 @@ router.post('/register', async (req, res) => {
             new StudentRegisterRequest({
                 user_id: user_id,
                 course_id: course_id,
+                adviser_id: course.adviser_id,
                 image: course.image,
                 course_name: course.name,
                 content: new ContentRegisterRequest(content),
@@ -109,6 +110,51 @@ router.get('/courses', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(412).json({ message: error.message });
+    }
+});
+router.get('/adviser', async (req, res) => {
+    try {
+        const adviserId = req.query.adviser_id;
+        const entities = await QueryRepository.getStudentsByAdviserId(adviserId);
+        const response = await Promise.all(
+            entities.map(async entity => {
+                const user = await Repository.getById(entity.user_id, 'users');
+                return {
+                    id: entity.id,
+                    curp: user?.curp,
+                    course_name: entity.course_name
+                };
+            }
+        ));
+        res.status(200).json(response);
+    } catch (error) {
+        console.error(error);
+        res.status(412).json({ message: error.message });
+    }
+});
+router.post('/bill', async (req, res) => {
+    const { url, amount, student_id } = req.body;
+    try {
+        if (amount <= 0) {
+            return res.status(400).json({ message: 'Monto no válido' });
+        }
+        const student = await Repository.getById(student_id, repositoryName);
+        if (!student) {
+            return res.status(409).json({ message: 'No se encontró al estudiante' });
+        }
+        student.payments.push({
+            amount,
+            date: new Date(),
+            url
+        });
+        student.costCompleted += amount;
+        const updatedStudent = await Repository.update(student_id, student, repositoryName);
+        res.status(200).json({
+            message: "Registro de pago exitoso"
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 });
 
