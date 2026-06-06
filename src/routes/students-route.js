@@ -125,7 +125,7 @@ router.get('/adviser', async (req, res) => {
                     course_name: entity.course_name
                 };
             }
-        ));
+            ));
         res.status(200).json(response);
     } catch (error) {
         console.error(error);
@@ -147,7 +147,8 @@ router.post('/bill', async (req, res) => {
             date: new Date(),
             url
         });
-        student.costCompleted += amount;
+
+        student.costCompleted = parseFloat(student.costCompleted) + parseFloat(amount);
         const updatedStudent = await Repository.update(student_id, student, repositoryName);
         res.status(200).json({
             message: "Registro de pago exitoso"
