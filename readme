@@ -1,0 +1,13 @@
+gcloud run deploy school-web \
+  --source . \
+  --region us-east1 \
+  --allow-unauthenticated
+
+gcloud run deploy school-back \
+  --source . \
+  --region us-east1 \
+  --allow-unauthenticated
+
+gcloud run services update school-back \
+  --region us-east1 \
+  --set-env-vars="GOOGLE_CLOUD_PROJECT=project-89b7d84d-e1c0-4688-88a,FIREBASE_STORAGE_BUCKET=school-source"

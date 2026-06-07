@@ -7,7 +7,10 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(cors({ origin: 'http://localhost:3001' }));
+app.use(cors([
+  { origin: 'http://localhost:3001' },
+  { origin: 'https://school-web-764239827508.us-east1.run.app' }
+]));
 
 const routesPath = path.join(__dirname, 'src', 'routes');
 
