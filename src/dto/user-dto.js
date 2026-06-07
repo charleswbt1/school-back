@@ -8,7 +8,8 @@ class UserRegisterRequest {
         second_last_name,
         curp,
         phone,
-        email
+        email,
+        image
     }) {
         this.nick_name = nick_name;
         this.password = password;
@@ -19,6 +20,7 @@ class UserRegisterRequest {
         this.second_last_name = second_last_name;
         this.phone = phone;
         this.email = email;
+        this.image = image;
     }
 }
 
