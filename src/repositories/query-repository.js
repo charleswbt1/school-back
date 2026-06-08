@@ -107,5 +107,19 @@ class QueryRepository {
             ...doc.data()
         };
     }
+
+    async getUsersByRole(role) {
+        const ref = this
+            .getCollection('users')
+            .where('role', '==', role);
+        const snapshot = await ref.get();
+        if (snapshot.empty) {
+            return [];
+        }
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    }
 }
 module.exports = new QueryRepository();

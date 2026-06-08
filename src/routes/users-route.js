@@ -73,7 +73,6 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-
 router.get('/valid-item', async (req, res) => {
     const email = req.query.email;
     const nick_name = req.query.nick_name;
@@ -85,6 +84,16 @@ router.get('/valid-item', async (req, res) => {
             const result = await QueryRepository.isEmailValid(email);
             res.status(200).json(result);
         }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+router.get('/role', async (req, res) => {
+    const role = req.query.role;
+    try {
+        const users = await QueryRepository.getUsersByRole(role);
+        res.status(200).json(users.map(Utils.formatDates));
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
