@@ -122,7 +122,9 @@ router.get('/adviser', async (req, res) => {
                 return {
                     id: entity.id,
                     curp: user?.curp,
-                    course_name: entity.course_name
+                    name: user?.first_name + ' ' + user?.last_name + ' ' + user?.second_last_name,
+                    course_name: entity.course_name,
+                    commision: entity.payments.find(payment => payment.source === 'coordinator') ? true : false
                 };
             }
             ));
@@ -133,7 +135,7 @@ router.get('/adviser', async (req, res) => {
     }
 });
 router.post('/bill', async (req, res) => {
-    const { url, amount, student_id } = req.body;
+    const { url, amount, student_id, source } = req.body;
     try {
         if (amount <= 0) {
             return res.status(400).json({ message: 'Monto no válido' });
@@ -144,6 +146,7 @@ router.post('/bill', async (req, res) => {
         }
         student.payments.push({
             amount,
+            source: source,
             date: new Date(),
             url
         });

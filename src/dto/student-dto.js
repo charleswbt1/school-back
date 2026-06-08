@@ -4,11 +4,13 @@ class Payment {
     constructor({
         amount,
         date,
-        url
+        url,
+        source
     }) {
         this.amount = amount;
         this.date = date;
         this.url = url;
+        this.source = source;
     }
 }
 class Document {
