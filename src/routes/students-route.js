@@ -124,6 +124,7 @@ router.get('/adviser', async (req, res) => {
                     curp: user?.curp,
                     name: user?.first_name + ' ' + user?.last_name + ' ' + user?.second_last_name,
                     course_name: entity.course_name,
+                    phone: user?.phone,
                     commision: entity.payments.find(payment => payment.source === 'coordinator') ? true : false
                 };
             }
