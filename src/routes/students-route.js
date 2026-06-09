@@ -58,7 +58,7 @@ router.delete('', async (req, res) => {
 });
 
 router.post('/register', async (req, res) => {
-    const { user_id, course_id } = req.body;
+    const { user_id, course_id, adviser_id } = req.body;
     try {
         const student = await QueryRepository.getStudentByCourseIdAndUserId(course_id, user_id);
         if (student) {
@@ -75,7 +75,7 @@ router.post('/register', async (req, res) => {
             new StudentRegisterRequest({
                 user_id: user_id,
                 course_id: course_id,
-                adviser_id: course.adviser_id,
+                adviser_id: adviser_id || course.adviser_id,
                 image: course.image,
                 course_name: course.name,
                 content: new ContentRegisterRequest(content),
