@@ -32,6 +32,7 @@ class StudentRegisterRequest {
         content,
         totalModules,
         totalCost,
+        monthly_payment,
         modulesCompleted,
         costCompleted,
         payments,
@@ -45,6 +46,7 @@ class StudentRegisterRequest {
         this.content = new ContentRegisterRequest(content);
         this.totalModules = totalModules;
         this.totalCost = totalCost;
+        this.monthly_payment = monthly_payment;
         this.modulesCompleted = modulesCompleted;
         this.costCompleted = costCompleted;
         this.payments = payments.map(

@@ -71,6 +71,9 @@ router.post('/register', async (req, res) => {
         const result = await Repository.getById(user_id, 'users');
         const course = await Repository.getById(course_id, 'courses');
         const content = await Repository.getById(course.content_id, 'contents');
+        content.modules.forEach(module => {
+            module.qualification = null;
+        });
         const newStudent = await Repository.create(
             new StudentRegisterRequest({
                 user_id: user_id,
@@ -81,6 +84,7 @@ router.post('/register', async (req, res) => {
                 content: new ContentRegisterRequest(content),
                 totalModules: content.modules?.length || 0,
                 totalCost: course.cost,
+                monthly_payment: course.monthly_payment,
                 modulesCompleted: 0,
                 costCompleted: 0,
                 payments: [],
@@ -112,10 +116,15 @@ router.get('/courses', async (req, res) => {
         res.status(412).json({ message: error.message });
     }
 });
-router.get('/adviser', async (req, res) => {
+router.get('/data', async (req, res) => {
     try {
         const adviserId = req.query.adviser_id;
-        const entities = await QueryRepository.getStudentsByAdviserId(adviserId);
+        let entities = [];
+        if (adviserId) {
+            entities = await QueryRepository.getStudentsByAdviserId(adviserId);
+        } else {
+            entities = await Repository.getAll('students');
+        }
         const response = await Promise.all(
             entities.map(async entity => {
                 const user = await Repository.getById(entity.user_id, 'users');
