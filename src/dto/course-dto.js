@@ -5,9 +5,18 @@ class CourseRegisterRequest {
         squad_id,
         content_id,
         adviser_id,
+        teacher_id,
         image,
         cost,
-        monthly_payment,
+        costInscription,
+        offerCostInscription,
+        costQuota,
+        offerCostQuota,
+        costReinscription,
+        offerCostReinscription,
+        costTitle,
+        offerCostTitle,
+        offer,
         rvoe,
         date_init,
         date_end
@@ -17,9 +26,19 @@ class CourseRegisterRequest {
         this.squad_id = squad_id;
         this.content_id = content_id;
         this.adviser_id = adviser_id;
+        this.teacher_id = teacher_id;
         this.image = image;
         this.cost = cost;
-        this.monthly_payment = monthly_payment;
+        this.costInscription = costInscription;
+        this.offerCostInscription = offerCostInscription;
+        this.costQuota = costQuota;
+        this.offerCostQuota = offerCostQuota;
+        this.costReinscription = costReinscription;
+        this.offerCostReinscription = offerCostReinscription;
+        this.costTitle = costTitle;
+        this.offerCostTitle = offerCostTitle;
+        this.offer = offer;
+        this.quota = quota;
         this.rvoe = rvoe;
         this.date_init = date_init;
         this.date_end = date_end;

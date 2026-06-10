@@ -21,12 +21,14 @@ router.post('', async (req, res) => {
 router.get('', async (req, res) => {
     try {
         const id = req.query.id;
+        const state = req.query.state;
         var entities;
         if (id) {
             const entity = await Repository.getById(id, repositoryName);
             entities = entity ? [entity] : [];
-        }
-        else {
+        } else if (state) {
+            entities = await Repository.getByState(state, repositoryName);
+        } else {
             entities = await Repository.getAll(repositoryName);
         }
         res.status(200).json(entities.map(Utils.formatDates));
@@ -165,6 +167,27 @@ router.post('/bill', async (req, res) => {
         const updatedStudent = await Repository.update(student_id, student, repositoryName);
         res.status(200).json({
             message: "Registro de pago exitoso"
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+router.post('/qualification', async (req, res) => {
+    const { module_name, qualification, student_id } = req.body;
+    try {
+        if (qualification <= 0 || qualification > 10) {
+            return res.status(400).json({ message: 'Calificación no válida' });
+        }
+        const student = await Repository.getById(student_id, repositoryName);
+        if (!student) {
+            return res.status(409).json({ message: 'No se encontró al estudiante' });
+        }
+        student.content.modules.find(module => module.name === module_name).qualification = qualification;
+
+        const updatedStudent = await Repository.update(student_id, student, repositoryName);
+        res.status(200).json({
+            message: "Registro de calificación exitoso"
         });
     } catch (error) {
         console.error(error);

@@ -16,6 +16,17 @@ class Repository {
         }));
     }
 
+    async getByState(state, collectionName) {
+        const snapshot = await this
+            .getCollection(collectionName)
+            .where('state', '==', state)
+            .get();
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    }
+
     async getById(id, collectionName) {
         const ref = this
             .getCollection(collectionName)

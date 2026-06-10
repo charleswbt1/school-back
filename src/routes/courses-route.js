@@ -20,13 +20,15 @@ router.post('', async (req, res) => {
 router.get('', async (req, res) => {
     try {
         const id = req.query.id;
+        const state = req.query.state;
         var entities;
-        if (!id) {
-            entities = await Repository.getAll(repositoryName);
-        }
         if (id) {
             const entity = await Repository.getById(id, repositoryName);
             entities = entity ? [entity] : [];
+        } else if (state) {
+            entities = await Repository.getByState(state, repositoryName);
+        } else {
+            entities = await Repository.getAll(repositoryName);
         }
         res.status(200).json(entities.map(Utils.formatDates));
     } catch (error) {
