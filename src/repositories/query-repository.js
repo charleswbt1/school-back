@@ -22,29 +22,16 @@ class QueryRepository {
         };
     }
 
-    async isEmailValid(email) {
+    async validUnique(key, value) {
         const ref = this
             .getCollection('users')
-            .where('email', '==', email)
+            .where(key, '==', value)
             .limit(1);
         const snapshot = await ref.get();
         return {
-            item: 'email',
+            item: key,
             valid: snapshot.empty,
-            message: snapshot.empty ? 'Email is available' : 'Email is already taken'
-        };
-    }
-
-    async isNicknameValid(nick_name) {
-        const ref = this
-            .getCollection('users')
-            .where('nick_name', '==', nick_name)
-            .limit(1);
-        const snapshot = await ref.get();
-        return {
-            item: 'nick_name',
-            valid: snapshot.empty,
-            message: snapshot.empty ? 'Nickname is available' : 'Nickname is already taken'
+            message: snapshot.empty ? `${key} is available` : `${key} is already taken`
         };
     }
 

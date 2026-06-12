@@ -12,6 +12,24 @@ router.post('', async (req, res) => {
     try {
         req.body.password = await bcrypt.hash(req.body.password, 10);
         const request = new UserRegisterRequest(req.body);
+
+        const nickName = await QueryRepository.validUnique('nick_name', request.nickName);
+        if (!nickName.valid) {
+            throw new Error(nickName.message);
+        }
+        const email = await QueryRepository.validUnique('email', request.email);
+        if (!email.valid) {
+            throw new Error(email.message);
+        }
+        const curp = await QueryRepository.validUnique('curp', request.curp);
+        if (!curp.valid) {
+            throw new Error(curp.message);
+        }
+        const phone = await QueryRepository.validUnique('phone', request.phone);
+        if (!phone.valid) {
+            throw new Error(phone.message);
+        }
+
         const entity = await Repository.create(request, repositoryName);
         res.status(201).json(Utils.formatDates(entity));
     } catch (error) {
@@ -69,22 +87,6 @@ router.post('/login', async (req, res) => {
             res.status(200).json({ role: user.role, user_id: user.id });
         } else {
             res.status(401).json({ message: 'Invalid credentials' });
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-});
-router.get('/valid-item', async (req, res) => {
-    const email = req.query.email;
-    const nick_name = req.query.nick_name;
-    try {
-        if (nick_name) {
-            const result = await QueryRepository.isNicknameValid(nick_name);
-            res.status(200).json(result);
-        } else {
-            const result = await QueryRepository.isEmailValid(email);
-            res.status(200).json(result);
         }
     } catch (error) {
         console.error(error);
