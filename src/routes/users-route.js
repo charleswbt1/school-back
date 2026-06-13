@@ -103,5 +103,19 @@ router.get('/role', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+router.post('/password', async (req, res) => {
+    const { user_id, new_password } = req.body;
+    try {
+        const pass = await bcrypt.hash(req.body.new_password, 10);
+        const user = await Repository.getById(user_id, repositoryName);
+        user.password = pass;
+        await Repository.update(user_id, user, repositoryName);
+        
+        res.status(200).json({ role: user.role, user_id: user.id });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
 
 module.exports = router;

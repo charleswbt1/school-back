@@ -89,6 +89,7 @@ router.post('/register', async (req, res) => {
                 monthly_payment: course.monthly_payment,
                 modulesCompleted: 0,
                 costCompleted: 0,
+                average: 0,
                 payments: [],
                 documents: []
             }),
@@ -184,6 +185,7 @@ router.post('/qualification', async (req, res) => {
             return res.status(409).json({ message: 'No se encontró al estudiante' });
         }
         student.content.modules.find(module => module.name === module_name).qualification = qualification;
+        student.average = student.content.modules.reduce((sum, module) => sum + (module.qualification || 0), 0) / student.content.modules.length;
 
         const updatedStudent = await Repository.update(student_id, student, repositoryName);
         res.status(200).json({

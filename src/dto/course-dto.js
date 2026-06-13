@@ -19,7 +19,9 @@ class CourseRegisterRequest {
         offer,
         rvoe,
         date_init,
-        date_end
+        date_end,
+        content,
+        inscription_available
     }) {
         this.name = name;
         this.description = description;
@@ -42,6 +44,8 @@ class CourseRegisterRequest {
         this.rvoe = rvoe;
         this.date_init = date_init;
         this.date_end = date_end;
+        this.content = new ContentRegisterRequest(content);
+        this.inscription_available = inscription_available
     }
 }
 

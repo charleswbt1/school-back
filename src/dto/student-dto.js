@@ -30,6 +30,7 @@ class StudentRegisterRequest {
         image,
         course_name,
         content,
+        average,
         totalModules,
         totalCost,
         monthly_payment,
@@ -44,6 +45,7 @@ class StudentRegisterRequest {
         this.image = image;
         this.course_name = course_name;
         this.content = new ContentRegisterRequest(content);
+        this.average = average;
         this.totalModules = totalModules;
         this.totalCost = totalCost;
         this.monthly_payment = monthly_payment;
