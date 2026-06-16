@@ -108,5 +108,21 @@ class QueryRepository {
             ...doc.data()
         }));
     }
+
+    async getPeriod(month, year) {
+        const ref = this
+            .getCollection('periods')
+            .where('month', '==', month)
+            .where('year', '==', year)
+            .limit(1);
+        const snapshot = await ref.get();
+        if (snapshot.empty) {
+            return [];
+        }
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    }
 }
 module.exports = new QueryRepository();

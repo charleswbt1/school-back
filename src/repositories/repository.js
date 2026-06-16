@@ -48,8 +48,8 @@ class Repository {
             .toUpperCase();
         const newData = {
             id: `${prefix}_${Date.now()}`,
-            ...JSON.parse(JSON.stringify(data)),
             state: 'active',
+            ...JSON.parse(JSON.stringify(data)),
             createdAt: new Date(),
             updatedAt: new Date()
         };

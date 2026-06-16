@@ -1,3 +1,5 @@
+const ContentRegisterRequest = require('../dto/content-dto.js');
+
 class CourseRegisterRequest {
     constructor({
         name,
@@ -16,12 +18,12 @@ class CourseRegisterRequest {
         offerCostReinscription,
         costTitle,
         offerCostTitle,
+        numberQuota,
         offer,
         rvoe,
         date_init,
         date_end,
-        content,
-        inscription_available
+        content
     }) {
         this.name = name;
         this.description = description;
@@ -39,13 +41,12 @@ class CourseRegisterRequest {
         this.offerCostReinscription = offerCostReinscription;
         this.costTitle = costTitle;
         this.offerCostTitle = offerCostTitle;
+        this.numberQuota = numberQuota;
         this.offer = offer;
-        this.quota = quota;
         this.rvoe = rvoe;
         this.date_init = date_init;
         this.date_end = date_end;
-        this.content = new ContentRegisterRequest(content);
-        this.inscription_available = inscription_available
+        this.content = content ? new ContentRegisterRequest(content) : null;
     }
 }
 

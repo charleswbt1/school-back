@@ -13,17 +13,9 @@ router.post('', async (req, res) => {
         req.body.password = await bcrypt.hash(req.body.password, 10);
         const request = new UserRegisterRequest(req.body);
 
-        const nickName = await QueryRepository.validUnique('nick_name', request.nickName);
+        const nickName = await QueryRepository.validUnique('nick_name', request.nick_name);
         if (!nickName.valid) {
             throw new Error(nickName.message);
-        }
-        const email = await QueryRepository.validUnique('email', request.email);
-        if (!email.valid) {
-            throw new Error(email.message);
-        }
-        const curp = await QueryRepository.validUnique('curp', request.curp);
-        if (!curp.valid) {
-            throw new Error(curp.message);
         }
         const phone = await QueryRepository.validUnique('phone', request.phone);
         if (!phone.valid) {
@@ -110,7 +102,7 @@ router.post('/password', async (req, res) => {
         const user = await Repository.getById(user_id, repositoryName);
         user.password = pass;
         await Repository.update(user_id, user, repositoryName);
-        
+
         res.status(200).json({ role: user.role, user_id: user.id });
     } catch (error) {
         console.error(error);

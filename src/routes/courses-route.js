@@ -5,6 +5,7 @@ const Repository = require('../repositories/repository.js');
 const QueryRepository = require('../repositories/query-repository.js');
 const CourseRegisterRequest = require('../dto/course-dto.js');
 const ContentRegisterRequest = require('../dto/content-dto.js');
+const PeriodRegisterRequest = require('../dto/period-dto.js');
 
 const repositoryName = 'courses';
 
@@ -13,8 +14,24 @@ router.post('', async (req, res) => {
         const request = new CourseRegisterRequest(req.body);
         const content = await Repository.getById(request.content_id, "contents");
         request.content = new ContentRegisterRequest(content);
-        request.inscription_available = true;
         const entity = await Repository.create(request, repositoryName);
+
+        const toDay = new Date();
+        const month = toDay.toLocaleString('es-MX', { month: 'long' }).toUpperCase();
+        const year = toDay.getFullYear();
+        const periods = await QueryRepository.getPeriod(month, year);
+        if (periods.length > 0) {
+            const period = periods[0];
+            period.courses.push(request.name);
+            await Repository.update(period.id, period, 'periods');
+        } else {
+            const newPeriod = {
+                month: month,
+                year: year,
+                courses: [request.name]
+            }
+            await Repository.create(newPeriod, 'periods');
+        }
         res.status(201).json(Utils.formatDates(entity));
     } catch (error) {
         console.error(error);
@@ -62,6 +79,15 @@ router.delete('', async (req, res) => {
     }
 });
 
+router.get('/periods', async (req, res) => {
+    try {
+        const entities = await Repository.getAll('periods');
+        res.status(200).json(entities.map(Utils.formatDates));
+    } catch (error) {
+        console.error(error);
+        res.status(412).json({ message: error.message });
+    }
+});
 router.get('/students', async (req, res) => {
     try {
         const courseId = req.query.course_id;

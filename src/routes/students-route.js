@@ -90,8 +90,9 @@ router.post('/register', async (req, res) => {
                 modulesCompleted: 0,
                 costCompleted: 0,
                 average: 0,
-                payments: [],
-                documents: []
+                payments: payments,
+                documents: [],
+                state: 'pendiente'
             }),
             repositoryName
         );
@@ -137,7 +138,7 @@ router.get('/data', async (req, res) => {
                     name: user?.first_name + ' ' + user?.last_name + ' ' + user?.second_last_name,
                     course_name: entity.course_name,
                     phone: user?.phone,
-                    commision: entity.payments.find(payment => payment.source === 'coordinator') ? true : false
+                    state: user?.state
                 };
             }
             ));
