@@ -90,7 +90,7 @@ router.post('/register', async (req, res) => {
                 modulesCompleted: 0,
                 costCompleted: 0,
                 average: 0,
-                payments: payments,
+                payments: [],
                 documents: [],
                 state: 'pendiente'
             }),

@@ -35,6 +35,34 @@ class QueryRepository {
         };
     }
 
+    async getPeriod(month, year) {
+        const ref = this
+            .getCollection('periods')
+            .where('month', '==', month)
+            .where('year', '==', year)
+            .limit(1);
+        const snapshot = await ref.get();
+        if (snapshot.empty) {
+            return [];
+        }
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    }
+
+    async getCoursesByPeriod(month, year) {
+        const snapshot = await this
+            .getCollection('courses')
+            .where('month', '==', month)
+            .where('year', '==', year)
+            .get();
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    }
+
     async getCoursesByUserId(userId) {
         const ref = this
             .getCollection('students')
@@ -99,22 +127,6 @@ class QueryRepository {
         const ref = this
             .getCollection('users')
             .where('role', '==', role);
-        const snapshot = await ref.get();
-        if (snapshot.empty) {
-            return [];
-        }
-        return snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
-    }
-
-    async getPeriod(month, year) {
-        const ref = this
-            .getCollection('periods')
-            .where('month', '==', month)
-            .where('year', '==', year)
-            .limit(1);
         const snapshot = await ref.get();
         if (snapshot.empty) {
             return [];

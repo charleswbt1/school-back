@@ -10,20 +10,21 @@ class CourseRegisterRequest {
         teacher_id,
         image,
         cost,
-        costInscription,
-        offerCostInscription,
-        costQuota,
-        offerCostQuota,
-        costReinscription,
-        offerCostReinscription,
-        costTitle,
-        offerCostTitle,
-        numberQuota,
-        offer,
+        cost_inscription,
+        offer_cost_inscription,
+        cost_quota,
+        offer_cost_quota,
+        cost_reinscription,
+        offer_cost_reinscription,
+        cost_title,
+        offer_cost_title,
+        number_quota,
         rvoe,
         date_init,
         date_end,
-        content
+        content,
+        month,
+        year
     }) {
         this.name = name;
         this.description = description;
@@ -33,20 +34,21 @@ class CourseRegisterRequest {
         this.teacher_id = teacher_id;
         this.image = image;
         this.cost = cost;
-        this.costInscription = costInscription;
-        this.offerCostInscription = offerCostInscription;
-        this.costQuota = costQuota;
-        this.offerCostQuota = offerCostQuota;
-        this.costReinscription = costReinscription;
-        this.offerCostReinscription = offerCostReinscription;
-        this.costTitle = costTitle;
-        this.offerCostTitle = offerCostTitle;
-        this.numberQuota = numberQuota;
-        this.offer = offer;
+        this.cost_inscription = cost_inscription;
+        this.offer_cost_inscription = offer_cost_inscription;
+        this.cost_quota = cost_quota;
+        this.offer_cost_quota = offer_cost_quota;
+        this.cost_reinscription = cost_reinscription;
+        this.offer_cost_reinscription = offer_cost_reinscription;
+        this.cost_title = cost_title;
+        this.offer_cost_title = offer_cost_title;
+        this.number_quota = number_quota;
         this.rvoe = rvoe;
         this.date_init = date_init;
         this.date_end = date_end;
         this.content = content ? new ContentRegisterRequest(content) : null;
+        this.month = month;
+        this.year = year;
     }
 }
 

@@ -33,11 +33,10 @@ class StudentRegisterRequest {
         course_name,
         content,
         average,
-        totalModules,
-        totalCost,
-        monthly_payment,
-        modulesCompleted,
-        costCompleted,
+        total_modules,
+        total_cost,
+        modules_completed,
+        cost_completed,
         payments,
         documents
     }) {
@@ -48,11 +47,10 @@ class StudentRegisterRequest {
         this.course_name = course_name;
         this.content = new ContentRegisterRequest(content);
         this.average = average;
-        this.totalModules = totalModules;
-        this.totalCost = totalCost;
-        this.monthly_payment = monthly_payment;
-        this.modulesCompleted = modulesCompleted;
-        this.costCompleted = costCompleted;
+        this.total_modules = total_modules;
+        this.total_cost = total_cost;
+        this.modules_completed = modules_completed;
+        this.cost_completed = cost_completed;
         this.payments = payments.map(
             payment => new Payment(payment)
         );

@@ -14,11 +14,12 @@ router.post('', async (req, res) => {
         const request = new CourseRegisterRequest(req.body);
         const content = await Repository.getById(request.content_id, "contents");
         request.content = new ContentRegisterRequest(content);
-        const entity = await Repository.create(request, repositoryName);
 
         const toDay = new Date();
         const month = toDay.toLocaleString('es-MX', { month: 'long' }).toUpperCase();
         const year = toDay.getFullYear();
+        request.month = month;
+        request.year = `${year}`;
         const periods = await QueryRepository.getPeriod(month, year);
         if (periods.length > 0) {
             const period = periods[0];
@@ -32,6 +33,7 @@ router.post('', async (req, res) => {
             }
             await Repository.create(newPeriod, 'periods');
         }
+        const entity = await Repository.create(request, repositoryName);
         res.status(201).json(Utils.formatDates(entity));
     } catch (error) {
         console.error(error);
@@ -42,13 +44,21 @@ router.get('', async (req, res) => {
     try {
         const id = req.query.id;
         const state = req.query.state;
+        const year = req.query.year;
+        const month = req.query.month;
         var entities;
-        if (id) {
+        if (year && month) {
+            console.log(`${year} ${month}`);
+            entities = await QueryRepository.getCoursesByPeriod(month, year);
+        } else if (id) {
+            console.log('busca id');
             const entity = await Repository.getById(id, repositoryName);
             entities = entity ? [entity] : [];
         } else if (state) {
+            console.log('busca estado');
             entities = await Repository.getByState(state, repositoryName);
         } else {
+            console.log('default');
             entities = await Repository.getAll(repositoryName);
         }
         res.status(200).json(entities.map(Utils.formatDates));
@@ -104,7 +114,7 @@ router.post('/multimedia', async (req, res) => {
         const course = await Repository.getById(course_id, repositoryName);
         const students = await QueryRepository.getStudentsByCourseId(course_id);
 
-        if (topic) {
+        if (topic_name) {
             course.content.modules.find(module => module.name === module_name).topics
                 .find(topic => topic.name === topic_name).multimedia = url;
             await Repository.update(course_id, course, repositoryName);
@@ -114,12 +124,20 @@ router.post('/multimedia', async (req, res) => {
                     .find(topic => topic.name === topic_name).multimedia = url;
                 await Repository.update(student.id, student, "students");
             });
-        } else {
+        } else if (module_name) {
             course.content.modules.find(module => module.name === module_name).exam = url;
             await Repository.update(course_id, course, repositoryName);
 
             students.map(async (student) => {
                 student.content.modules.find(module => module.name === module_name).exam = url;
+                await Repository.update(student.id, student, "students");
+            });
+        } else {
+            course.content.call_link = url;
+            await Repository.update(course_id, course, repositoryName);
+
+            students.map(async (student) => {
+                student.content.call_link = url;
                 await Repository.update(student.id, student, "students");
             });
         }

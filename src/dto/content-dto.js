@@ -36,10 +36,12 @@ class ContentRegisterRequest {
     constructor({
         name,
         description,
+        call_link,
         modules = []
     }) {
         this.name = name;
         this.description = description;
+        this.call_link = call_link;
         this.modules = modules.map(
             module => new Module(module)
         );
