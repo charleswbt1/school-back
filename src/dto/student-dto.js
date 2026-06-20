@@ -2,12 +2,14 @@ const ContentRegisterRequest = require('../dto/content-dto.js');
 
 class Payment {
     constructor({
+        year,
         month,
         amount,
         date,
         url,
         source
     }) {
+        this.year = year;
         this.month = month;
         this.amount = amount;
         this.date = date;

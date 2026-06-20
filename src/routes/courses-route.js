@@ -48,17 +48,13 @@ router.get('', async (req, res) => {
         const month = req.query.month;
         var entities;
         if (year && month) {
-            console.log(`${year} ${month}`);
             entities = await QueryRepository.getCoursesByPeriod(month, year);
         } else if (id) {
-            console.log('busca id');
             const entity = await Repository.getById(id, repositoryName);
             entities = entity ? [entity] : [];
         } else if (state) {
-            console.log('busca estado');
             entities = await Repository.getByState(state, repositoryName);
         } else {
-            console.log('default');
             entities = await Repository.getAll(repositoryName);
         }
         res.status(200).json(entities.map(Utils.formatDates));

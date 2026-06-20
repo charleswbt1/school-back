@@ -22,8 +22,12 @@ router.get('', async (req, res) => {
     try {
         const id = req.query.id;
         const state = req.query.state;
+        const courseId = req.query.course_id;
         var entities;
-        if (id) {
+
+        if (courseId) {
+            entities = await QueryRepository.getStudentsByCourseId(courseId);
+        } else if (id) {
             const entity = await Repository.getById(id, repositoryName);
             entities = entity ? [entity] : [];
         } else if (state) {
@@ -84,11 +88,11 @@ router.post('/register', async (req, res) => {
                 image: course.image,
                 course_name: course.name,
                 content: new ContentRegisterRequest(content),
-                totalModules: content.modules?.length || 0,
-                totalCost: course.cost,
+                total_modules: content.modules?.length || 0,
+                total_cost: course.cost,
                 monthly_payment: course.monthly_payment,
-                modulesCompleted: 0,
-                costCompleted: 0,
+                modules_completed: 0,
+                cost_completed: 0,
                 average: 0,
                 payments: [],
                 documents: [],
@@ -149,7 +153,7 @@ router.get('/data', async (req, res) => {
     }
 });
 router.post('/bill', async (req, res) => {
-    const { url, amount, student_id, source } = req.body;
+    const { url, amount, student_id, year, month, source } = req.body;
     try {
         if (amount <= 0) {
             return res.status(400).json({ message: 'Monto no válido' });
@@ -162,9 +166,10 @@ router.post('/bill', async (req, res) => {
             amount,
             source: source,
             date: new Date(),
+            year: `${year}`,
+            month: month,
             url
         });
-
         student.costCompleted = parseFloat(student.costCompleted) + parseFloat(amount);
         const updatedStudent = await Repository.update(student_id, student, repositoryName);
         res.status(200).json({
@@ -195,6 +200,38 @@ router.post('/qualification', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
+    }
+});
+router.get('/control', async (req, res) => {
+    try {
+        const courseId = req.query.course_id;
+        const course = await Repository.getById(courseId, 'courses');
+        var entities = await QueryRepository.getStudentsByCourseId(courseId);
+
+        const students = await Promise.all(
+            entities.map(async entity => {
+                const user = await Repository.getById(entity.user_id, 'users');
+                return {
+                    id: entity.id,
+                    curp: user?.curp,
+                    name: user?.first_name + ' ' + user?.last_name + ' ' + user?.second_last_name,
+                    phone: user?.phone,
+                    state: user?.state,
+                    payments: user?.payments || [],
+                    documents: user?.documents || []
+                };
+            }
+            ));
+        const response = {
+            course_name: course.name,
+            date_init: course.date_init,
+            date_end: course.date_end,
+            students: students
+        }
+        res.status(200).json(response);
+    } catch (error) {
+        console.error(error);
+        res.status(412).json({ message: error.message });
     }
 });
 
