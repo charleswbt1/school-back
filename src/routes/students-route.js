@@ -82,6 +82,7 @@ router.post('/register', async (req, res) => {
         });
         const newStudent = await Repository.create(
             new StudentRegisterRequest({
+                school_id: '',
                 user_id: user_id,
                 course_id: course_id,
                 adviser_id: adviser_id || course.adviser_id,
@@ -180,6 +181,26 @@ router.post('/bill', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+router.post('/document', async (req, res) => {
+    const { url, type, student_id } = req.body;
+    try {
+        const student = await Repository.getById(student_id, repositoryName);
+        if (!student) {
+            return res.status(409).json({ message: 'No se encontró al estudiante' });
+        }
+        student.documents.push({
+            type,
+            url
+        });
+
+        const updatedStudent = await Repository.update(student_id, student, repositoryName);
+        res.status(200).json({
+            message: `Registro de documento ${type} exitoso`
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
 router.post('/qualification', async (req, res) => {
     const { module_name, qualification, student_id } = req.body;
     try {
@@ -217,8 +238,8 @@ router.get('/control', async (req, res) => {
                     name: user?.first_name + ' ' + user?.last_name + ' ' + user?.second_last_name,
                     phone: user?.phone,
                     state: user?.state,
-                    payments: user?.payments || [],
-                    documents: user?.documents || []
+                    payments: entity.payments || [],
+                    documents: entity.documents || []
                 };
             }
             ));

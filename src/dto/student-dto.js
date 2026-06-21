@@ -28,6 +28,7 @@ class Document {
 }
 class StudentRegisterRequest {
     constructor({
+        school_id,
         user_id,
         course_id,
         adviser_id,
@@ -42,6 +43,7 @@ class StudentRegisterRequest {
         payments,
         documents
     }) {
+        this.school_id = school_id;
         this.user_id = user_id;
         this.course_id = course_id;
         this.adviser_id = adviser_id;
