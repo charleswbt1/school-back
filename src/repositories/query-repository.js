@@ -51,9 +51,21 @@ class QueryRepository {
         }));
     }
 
-    async getCoursesByPeriod(month, year) {
+    async getPeriodsByCoordinator(coordinatorId) {
+        const ref = this
+            .getCollection('periods')
+            .where('coordinator_id', '==', coordinatorId);
+        const snapshot = await ref.get();
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    }
+
+    async getCoursesByPeriod(coordinatorId, month, year) {
         const snapshot = await this
             .getCollection('courses')
+            .where('coordinator_id', '==', coordinatorId)
             .where('month', '==', month)
             .where('year', '==', year)
             .get();
@@ -96,6 +108,20 @@ class QueryRepository {
         const ref = this
             .getCollection('students')
             .where('adviser_id', '==', adviserId);
+        const snapshot = await ref.get();
+        if (snapshot.empty) {
+            return [];
+        }
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    }
+
+    async getStudentsByCoordinatorId(coordinatorId) {
+        const ref = this
+            .getCollection('students')
+            .where('coordinator_id', '==', coordinatorId);
         const snapshot = await ref.get();
         if (snapshot.empty) {
             return [];

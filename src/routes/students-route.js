@@ -86,6 +86,7 @@ router.post('/register', async (req, res) => {
                 user_id: user_id,
                 course_id: course_id,
                 adviser_id: adviser_id || course.adviser_id,
+                coordinator_id: course.coordinator_id,
                 image: course.image,
                 course_name: course.name,
                 content: new ContentRegisterRequest(content),
@@ -128,11 +129,12 @@ router.get('/courses', async (req, res) => {
 router.get('/data', async (req, res) => {
     try {
         const adviserId = req.query.adviser_id;
+        const coordinatorId = req.query.coordinator_id;
         let entities = [];
         if (adviserId) {
             entities = await QueryRepository.getStudentsByAdviserId(adviserId);
         } else {
-            entities = await Repository.getAll('students');
+            entities = await QueryRepository.getStudentsByCoordinatorId(coordinatorId);
         }
         const response = await Promise.all(
             entities.map(async entity => {
@@ -171,7 +173,7 @@ router.post('/bill', async (req, res) => {
             month: month,
             url
         });
-        student.costCompleted = parseFloat(student.costCompleted) + parseFloat(amount);
+        student.cost_completed = parseFloat(student.cost_completed) + parseFloat(amount);
         const updatedStudent = await Repository.update(student_id, student, repositoryName);
         res.status(200).json({
             message: "Registro de pago exitoso"

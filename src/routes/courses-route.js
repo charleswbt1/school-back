@@ -27,6 +27,7 @@ router.post('', async (req, res) => {
             await Repository.update(period.id, period, 'periods');
         } else {
             const newPeriod = {
+                coordinator_id: request.coordinator_id,
                 month: month,
                 year: year,
                 courses: [request.name]
@@ -46,16 +47,15 @@ router.get('', async (req, res) => {
         const state = req.query.state;
         const year = req.query.year;
         const month = req.query.month;
+        const coordinatorId = req.query.coordinator_id;
         var entities;
         if (year && month) {
-            entities = await QueryRepository.getCoursesByPeriod(month, year);
+            entities = await QueryRepository.getCoursesByPeriod(coordinatorId, month, year);
         } else if (id) {
             const entity = await Repository.getById(id, repositoryName);
             entities = entity ? [entity] : [];
-        } else if (state) {
-            entities = await Repository.getByState(state, repositoryName);
         } else {
-            entities = await Repository.getAll(repositoryName);
+            entities = await Repository.getByState(state || 'active', repositoryName);
         }
         res.status(200).json(entities.map(Utils.formatDates));
     } catch (error) {
@@ -87,7 +87,8 @@ router.delete('', async (req, res) => {
 
 router.get('/periods', async (req, res) => {
     try {
-        const entities = await Repository.getAll('periods');
+        const coordinatorId = req.query.coordinator_id;
+        const entities = await QueryRepository.getPeriodsByCoordinator(coordinatorId);
         res.status(200).json(entities.map(Utils.formatDates));
     } catch (error) {
         console.error(error);

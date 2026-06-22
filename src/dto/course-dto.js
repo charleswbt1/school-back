@@ -4,6 +4,7 @@ class CourseRegisterRequest {
     constructor({
         name,
         description,
+        coordinator_id,
         squad_id,
         content_id,
         adviser_id,
@@ -28,6 +29,7 @@ class CourseRegisterRequest {
     }) {
         this.name = name;
         this.description = description;
+        this.coordinator_id = coordinator_id;
         this.squad_id = squad_id;
         this.content_id = content_id;
         this.adviser_id = adviser_id;
