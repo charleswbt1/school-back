@@ -25,7 +25,8 @@ class CourseRegisterRequest {
         date_end,
         content,
         month,
-        year
+        year,
+        state
     }) {
         this.name = name;
         this.description = description;
@@ -51,6 +52,7 @@ class CourseRegisterRequest {
         this.content = content ? new ContentRegisterRequest(content) : null;
         this.month = month;
         this.year = year;
+        this.state = state;
     }
 }
 

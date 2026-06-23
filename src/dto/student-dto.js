@@ -41,6 +41,7 @@ class StudentRegisterRequest {
         total_cost,
         modules_completed,
         cost_completed,
+        state,
         payments,
         documents
     }) {
@@ -57,6 +58,7 @@ class StudentRegisterRequest {
         this.total_cost = total_cost;
         this.modules_completed = modules_completed;
         this.cost_completed = cost_completed;
+        this.state = state;
         this.payments = payments.map(
             payment => new Payment(payment)
         );

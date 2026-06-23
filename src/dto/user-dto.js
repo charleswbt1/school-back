@@ -9,7 +9,8 @@ class UserRegisterRequest {
         curp,
         phone,
         email,
-        image
+        image,
+        state
     }) {
         this.nick_name = nick_name;
         this.password = password;
@@ -21,6 +22,7 @@ class UserRegisterRequest {
         this.phone = phone;
         this.email = email;
         this.image = image;
+        this.state = state;
     }
 }
 

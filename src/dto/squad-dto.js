@@ -3,12 +3,14 @@ class SquadRegisterRequest {
         name,
         description,
         cct,
-        logo
+        logo,
+        state
     }) {
         this.name = name;
         this.description = description;
         this.cct = cct;
         this.logo = logo;
+        this.state = state;
     }
 }
 

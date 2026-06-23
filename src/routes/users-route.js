@@ -17,10 +17,6 @@ router.post('', async (req, res) => {
         if (!nickName.valid) {
             throw new Error(nickName.message);
         }
-        const phone = await QueryRepository.validUnique('phone', request.phone);
-        if (!phone.valid) {
-            throw new Error(phone.message);
-        }
 
         const entity = await Repository.create(request, repositoryName);
         res.status(201).json(Utils.formatDates(entity));
