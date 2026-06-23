@@ -20,7 +20,7 @@ router.post('', async (req, res) => {
         const year = toDay.getFullYear();
         request.month = month;
         request.year = `${year}`;
-        const periods = await QueryRepository.getPeriod(month, year);
+        const periods = await QueryRepository.getPeriod(request.coordinator_id, month, year);
         if (periods.length > 0) {
             const period = periods[0];
             period.courses.push(request.name);

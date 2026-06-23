@@ -7,8 +7,7 @@ class QueryRepository {
     }
 
     async getCredential(nickname, password) {
-        const ref = this
-            .getCollection('users')
+        const ref = this.getCollection('users')
             .where('nick_name', '==', nickname)
             .limit(1);
         const snapshot = await ref.get();
@@ -23,8 +22,7 @@ class QueryRepository {
     }
 
     async validUnique(key, value) {
-        const ref = this
-            .getCollection('users')
+        const ref = this.getCollection('users')
             .where(key, '==', value)
             .limit(1);
         const snapshot = await ref.get();
@@ -35,9 +33,9 @@ class QueryRepository {
         };
     }
 
-    async getPeriod(month, year) {
-        const ref = this
-            .getCollection('periods')
+    async getPeriod(coordinatorId, month, year) {
+        const ref = this.getCollection('periods')
+            .where('coordinator_id', '==', coordinatorId)
             .where('month', '==', month)
             .where('year', '==', year)
             .limit(1);
@@ -52,8 +50,7 @@ class QueryRepository {
     }
 
     async getPeriodsByCoordinator(coordinatorId) {
-        const ref = this
-            .getCollection('periods')
+        const ref = this.getCollection('periods')
             .where('coordinator_id', '==', coordinatorId);
         const snapshot = await ref.get();
         return snapshot.docs.map(doc => ({
@@ -63,8 +60,7 @@ class QueryRepository {
     }
 
     async getCoursesByPeriod(coordinatorId, month, year) {
-        const snapshot = await this
-            .getCollection('courses')
+        const snapshot = await this.getCollection('courses')
             .where('coordinator_id', '==', coordinatorId)
             .where('month', '==', month)
             .where('year', '==', year)
@@ -76,8 +72,7 @@ class QueryRepository {
     }
 
     async getCoursesByUserId(userId) {
-        const ref = this
-            .getCollection('students')
+        const ref = this.getCollection('students')
             .where('user_id', '==', userId);
         const snapshot = await ref.get();
         if (snapshot.empty) {
@@ -90,8 +85,7 @@ class QueryRepository {
     }
 
     async getStudentsByCourseId(courseId) {
-        const ref = this
-            .getCollection('students')
+        const ref = this.getCollection('students')
             .where('course_id', '==', courseId)
             .where('state', '==', 'active');
         const snapshot = await ref.get();
@@ -105,8 +99,7 @@ class QueryRepository {
     }
 
     async getStudentsByAdviserId(adviserId) {
-        const ref = this
-            .getCollection('students')
+        const ref = this.getCollection('students')
             .where('adviser_id', '==', adviserId);
         const snapshot = await ref.get();
         if (snapshot.empty) {
@@ -119,8 +112,7 @@ class QueryRepository {
     }
 
     async getStudentsByCoordinatorId(coordinatorId) {
-        const ref = this
-            .getCollection('students')
+        const ref = this.getCollection('students')
             .where('coordinator_id', '==', coordinatorId);
         const snapshot = await ref.get();
         if (snapshot.empty) {
@@ -133,8 +125,7 @@ class QueryRepository {
     }
 
     async getStudentByCourseIdAndUserId(courseId, userId) {
-        const ref = this
-            .getCollection('students')
+        const ref = this.getCollection('students')
             .where('course_id', '==', courseId)
             .where('user_id', '==', userId)
             .limit(1);
@@ -150,8 +141,7 @@ class QueryRepository {
     }
 
     async getUsersByRole(role) {
-        const ref = this
-            .getCollection('users')
+        const ref = this.getCollection('users')
             .where('role', '==', role);
         const snapshot = await ref.get();
         if (snapshot.empty) {
@@ -163,4 +153,5 @@ class QueryRepository {
         }));
     }
 }
+
 module.exports = new QueryRepository();
