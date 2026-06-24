@@ -73,13 +73,7 @@ router.post('/register', async (req, res) => {
                 user_id: student.user_id
             });
         }
-
-        const result = await Repository.getById(user_id, 'users');
         const course = await Repository.getById(course_id, 'courses');
-        const content = await Repository.getById(course.content_id, 'contents');
-        content.modules.forEach(module => {
-            module.qualification = null;
-        });
         const newStudent = await Repository.create(
             new StudentRegisterRequest({
                 school_id: '',
@@ -89,7 +83,6 @@ router.post('/register', async (req, res) => {
                 coordinator_id: course.coordinator_id,
                 image: course.image,
                 course_name: course.name,
-                content: new ContentRegisterRequest(content),
                 total_modules: content.modules?.length || 0,
                 total_cost: course.cost,
                 monthly_payment: course.monthly_payment,
@@ -98,6 +91,7 @@ router.post('/register', async (req, res) => {
                 average: 0,
                 payments: [],
                 documents: [],
+                notes: [],
                 state: 'pendiente'
             }),
             repositoryName
@@ -213,9 +207,22 @@ router.post('/qualification', async (req, res) => {
         if (!student) {
             return res.status(409).json({ message: 'No se encontró al estudiante' });
         }
-        student.content.modules.find(module => module.name === module_name).qualification = qualification;
-        student.average = student.content.modules.reduce((sum, module) => sum + (module.qualification || 0), 0) / student.content.modules.length;
-
+        if (!student.notes) {
+            student.notes = [];
+        }
+        const note = student.notes.find(note => note.module === module_name);
+        if (note) {
+            note.value = Number(qualification);
+        } else {
+            student.notes.push({
+                module: module_name,
+                value: Number(qualification),
+                state: 'aprobado'
+            })
+        }
+        student.average = student.notes.length > 0
+            ? student.notes.reduce((sum, note) => sum + Number(note.value || 0), 0) / student.notes.length
+            : 0;
         const updatedStudent = await Repository.update(student_id, student, repositoryName);
         res.status(200).json({
             message: "Registro de calificación exitoso"

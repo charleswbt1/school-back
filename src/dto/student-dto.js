@@ -26,6 +26,18 @@ class Document {
         this.url = url;
     }
 }
+class Note {
+    constructor({
+        module,
+        value,
+        state
+    }) {
+        this.module = module;
+        this.value = value;
+        this.state = state;
+    }
+}
+
 class StudentRegisterRequest {
     constructor({
         school_id,
@@ -35,7 +47,6 @@ class StudentRegisterRequest {
         coordinator_id,
         image,
         course_name,
-        content,
         average,
         total_modules,
         total_cost,
@@ -43,7 +54,8 @@ class StudentRegisterRequest {
         cost_completed,
         state,
         payments,
-        documents
+        documents,
+        notes
     }) {
         this.school_id = school_id;
         this.user_id = user_id;
@@ -52,7 +64,6 @@ class StudentRegisterRequest {
         this.coordinator_id = coordinator_id;
         this.image = image;
         this.course_name = course_name;
-        this.content = new ContentRegisterRequest(content);
         this.average = average;
         this.total_modules = total_modules;
         this.total_cost = total_cost;
@@ -64,6 +75,9 @@ class StudentRegisterRequest {
         );
         this.documents = documents.map(
             document => new Document(document)
+        );
+        this.notes = notes.map(
+            note => new Note(note)
         );
     }
 }

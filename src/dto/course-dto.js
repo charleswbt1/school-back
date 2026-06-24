@@ -26,7 +26,10 @@ class CourseRegisterRequest {
         content,
         month,
         year,
-        state
+        state,
+        call_link,
+        class_link,
+        exam_link = []
     }) {
         this.name = name;
         this.description = description;
@@ -53,6 +56,9 @@ class CourseRegisterRequest {
         this.month = month;
         this.year = year;
         this.state = state;
+        this.call_link = call_link;
+        this.class_link = class_link;
+        this.exam_link = exam_link;
     }
 }
 

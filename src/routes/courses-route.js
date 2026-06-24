@@ -105,45 +105,5 @@ router.get('/students', async (req, res) => {
         res.status(412).json({ message: error.message });
     }
 });
-router.post('/multimedia', async (req, res) => {
-    try {
-        const { course_id, module_name, topic_name, url } = req.body;
-        const course = await Repository.getById(course_id, repositoryName);
-        const students = await QueryRepository.getStudentsByCourseId(course_id);
-
-        if (topic_name) {
-            course.content.modules.find(module => module.name === module_name).topics
-                .find(topic => topic.name === topic_name).multimedia = url;
-            await Repository.update(course_id, course, repositoryName);
-
-            students.map(async (student) => {
-                student.content.modules.find(module => module.name === module_name).topics
-                    .find(topic => topic.name === topic_name).multimedia = url;
-                await Repository.update(student.id, student, "students");
-            });
-        } else if (module_name) {
-            course.content.modules.find(module => module.name === module_name).exam = url;
-            await Repository.update(course_id, course, repositoryName);
-
-            students.map(async (student) => {
-                student.content.modules.find(module => module.name === module_name).exam = url;
-                await Repository.update(student.id, student, "students");
-            });
-        } else {
-            course.content.call_link = url;
-            await Repository.update(course_id, course, repositoryName);
-
-            students.map(async (student) => {
-                student.content.call_link = url;
-                await Repository.update(student.id, student, "students");
-            });
-        }
-
-        res.status(201).json(Utils.formatDates(course));
-    } catch (error) {
-        console.error(error);
-        res.status(409).json({ message: error.message });
-    }
-});
 
 module.exports = router;
