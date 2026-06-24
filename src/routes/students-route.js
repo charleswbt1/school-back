@@ -26,7 +26,7 @@ router.get('', async (req, res) => {
         var entities;
 
         if (courseId) {
-            entities = await QueryRepository.getStudentsByCourseId(courseId);
+            entities = await QueryRepository.getStudentsActiveByCourseId(courseId);
         } else if (id) {
             const entity = await Repository.getById(id, repositoryName);
             entities = entity ? [entity] : [];
@@ -44,8 +44,7 @@ router.get('', async (req, res) => {
 router.patch('', async (req, res) => {
     try {
         const id = req.query.id;
-        const request = new StudentRegisterRequest(req.body);
-        const entity = await Repository.update(id, request, repositoryName);
+        const entity = await Repository.update(id, req.body, repositoryName);
         res.status(200).json(Utils.formatDates(entity));
     } catch (error) {
         console.error(error);
@@ -74,6 +73,7 @@ router.post('/register', async (req, res) => {
             });
         }
         const course = await Repository.getById(course_id, 'courses');
+        const content = await Repository.getById(course.content_id, 'contents');
         const newStudent = await Repository.create(
             new StudentRegisterRequest({
                 school_id: '',
@@ -92,9 +92,10 @@ router.post('/register', async (req, res) => {
                 payments: [],
                 documents: [],
                 notes: [],
-                state: 'pendiente'
+                state: 'pending'
             }),
-            repositoryName
+            repositoryName,
+            'pending'
         );
         res.status(201).json({
             id: newStudent.id,
@@ -246,7 +247,8 @@ router.get('/control', async (req, res) => {
                     curp: user?.curp,
                     name: user?.first_name + ' ' + user?.last_name + ' ' + user?.second_last_name,
                     phone: user?.phone,
-                    state: user?.state,
+                    state: entity?.state,
+                    school_id: entity.school_id,
                     payments: entity.payments || [],
                     documents: entity.documents || []
                 };

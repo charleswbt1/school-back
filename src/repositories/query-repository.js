@@ -84,10 +84,23 @@ class QueryRepository {
         }));
     }
 
-    async getStudentsByCourseId(courseId) {
+    async getStudentsActiveByCourseId(courseId) {
         const ref = this.getCollection('students')
             .where('course_id', '==', courseId)
             .where('state', '==', 'active');
+        const snapshot = await ref.get();
+        if (snapshot.empty) {
+            return [];
+        }
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    }
+
+    async getStudentsByCourseId(courseId) {
+        const ref = this.getCollection('students')
+            .where('course_id', '==', courseId);
         const snapshot = await ref.get();
         if (snapshot.empty) {
             return [];
@@ -143,6 +156,20 @@ class QueryRepository {
     async getUsersByRole(role) {
         const ref = this.getCollection('users')
             .where('role', '==', role);
+        const snapshot = await ref.get();
+        if (snapshot.empty) {
+            return [];
+        }
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    }
+
+    async getUsersByRoleAndState(role, state) {
+        const ref = this.getCollection('users')
+            .where('role', '==', role)
+            .where('state', '==', state);
         const snapshot = await ref.get();
         if (snapshot.empty) {
             return [];

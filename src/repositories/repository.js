@@ -41,14 +41,14 @@ class Repository {
         };
     }
 
-    async create(data, collectionName) {
+    async create(data, collectionName, state) {
         const prefix = collectionName
             .replace(/s$/, '')
             .substring(0, 3)
             .toUpperCase();
         const newData = {
             id: `${prefix}_${Date.now()}`,
-            state: 'active',
+            state: state || 'active',
             ...JSON.parse(JSON.stringify(data)),
             createdAt: new Date(),
             updatedAt: new Date()

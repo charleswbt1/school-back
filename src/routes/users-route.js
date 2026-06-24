@@ -83,8 +83,14 @@ router.post('/login', async (req, res) => {
 });
 router.get('/role', async (req, res) => {
     const role = req.query.role;
+    const state = req.query.state;
     try {
-        const users = await QueryRepository.getUsersByRole(role);
+        let users;
+        if (state) {
+            users = await QueryRepository.getUsersByRoleAndState(role, state);
+        } else {
+            users = await QueryRepository.getUsersByRole(role);
+        }
         res.status(200).json(users.map(Utils.formatDates));
     } catch (error) {
         console.error(error);
