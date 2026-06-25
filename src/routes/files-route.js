@@ -19,8 +19,12 @@ router.post(
                 req.files &&
                 req.files.reqFile
             ) {
+                let newName = 'doc';
+                if (`${directory}`.includes('payment')) {
+                    newName = 'payment';
+                }
                 const file = req.files.reqFile[0];
-                path = `${directory}/${Date.now()}-${file.originalname}`;
+                path = `${directory}/${Date.now()}-${newName}`;
                 const refBucket = bucket.file(path);
 
                 await refBucket.save(

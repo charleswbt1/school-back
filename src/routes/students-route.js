@@ -169,6 +169,18 @@ router.post('/bill', async (req, res) => {
             url
         });
         student.cost_completed = parseFloat(student.cost_completed) + parseFloat(amount);
+
+        if (student.state === 'pending') {
+            const totalPaid = student.payments.filter(payment =>
+                payment.year === year && payment.month === month
+            ).reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+            const course = await Repository.getById(student.course_id, 'courses');
+            const total = course.offer_cost_inscription + course.offer_cost_quota;
+            if (totalPaid >= total) {
+                student.state = 'active';
+            }
+        }
+
         const updatedStudent = await Repository.update(student_id, student, repositoryName);
         res.status(200).json({
             message: "Registro de pago exitoso"
