@@ -15,7 +15,7 @@ router.post('', async (req, res) => {
         const content = await Repository.getById(request.content_id, "contents");
         request.content = new ContentRegisterRequest(content);
 
-        const toDay = new Date();
+        const toDay = new Date(request.date_init);
         const month = toDay.toLocaleString('es-MX', { month: 'long' }).toUpperCase();
         const year = toDay.getFullYear();
         request.month = month;
@@ -66,8 +66,7 @@ router.get('', async (req, res) => {
 router.patch('', async (req, res) => {
     try {
         const id = req.query.id;
-        const request = new CourseRegisterRequest(req.body);
-        const entity = await Repository.update(id, request, repositoryName);
+        const entity = await Repository.update(id, req.body, repositoryName);
         res.status(200).json(Utils.formatDates(entity));
     } catch (error) {
         console.error(error);
