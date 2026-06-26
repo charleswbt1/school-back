@@ -24,10 +24,12 @@ router.get('', async (req, res) => {
         if (id) {
             const entity = await Repository.getById(id, repositoryName);
             entities = entity ? [entity] : [];
-        } else if (state) {
-            entities = await Repository.getByState(state, repositoryName);
         } else {
-            entities = await Repository.getAll(repositoryName);
+            const filters = [];
+            if (state) {
+                filters.push(['state', '==', state]);
+            }
+            entities = await Repository.query(repositoryName, filters);
         }
         res.status(200).json(entities.map(Utils.formatDates));
     } catch (error) {
@@ -38,19 +40,8 @@ router.get('', async (req, res) => {
 router.patch('', async (req, res) => {
     try {
         const id = req.query.id;
-        const request = new SquadRegisterRequest(req.body);
-        const entity = await Repository.update(id, request, repositoryName);
+        const entity = await Repository.update(id, req.body, repositoryName);
         res.status(200).json(Utils.formatDates(entity));
-    } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
-    }
-});
-router.delete('', async (req, res) => {
-    try {
-        const id = req.query.id;
-        const result = await Repository.delete(id, repositoryName);
-        res.status(200).json(result);
     } catch (error) {
         console.error(error);
         res.status(412).json({ message: error.message });

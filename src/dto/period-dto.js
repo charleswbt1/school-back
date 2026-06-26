@@ -3,12 +3,14 @@ class PeriodRegisterRequest {
         coordinator_id,
         month,
         year,
-        courses = []
+        courses = [],
+        state
     }) {
         this.coordinator_id = coordinator_id;
         this.month = month;
         this.year = year;
         this.courses = courses;
+        this.state = state;
     }
 }
 

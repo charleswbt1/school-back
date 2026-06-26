@@ -2,70 +2,21 @@ const express = require('express');
 const router = express.Router();
 const Utils = require('../config/utils.js');
 const Repository = require('../repositories/repository.js');
-const QueryRepository = require('../repositories/query-repository.js');
 const StudentRegisterRequest = require('../dto/student-dto.js');
 const ContentRegisterRequest = require('../dto/content-dto.js');
 
 const repositoryName = 'students';
 
 router.post('', async (req, res) => {
-    try {
-        const request = new StudentRegisterRequest(req.body);
-        const entity = await Repository.create(request, repositoryName);
-        res.status(201).json(Utils.formatDates(entity));
-    } catch (error) {
-        console.error(error);
-        res.status(409).json({ message: error.message });
-    }
-});
-router.get('', async (req, res) => {
-    try {
-        const id = req.query.id;
-        const state = req.query.state;
-        const courseId = req.query.course_id;
-        var entities;
-
-        if (courseId) {
-            entities = await QueryRepository.getStudentsActiveByCourseId(courseId);
-        } else if (id) {
-            const entity = await Repository.getById(id, repositoryName);
-            entities = entity ? [entity] : [];
-        } else if (state) {
-            entities = await Repository.getByState(state, repositoryName);
-        } else {
-            entities = await Repository.getAll(repositoryName);
-        }
-        res.status(200).json(entities.map(Utils.formatDates));
-    } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
-    }
-});
-router.patch('', async (req, res) => {
-    try {
-        const id = req.query.id;
-        const entity = await Repository.update(id, req.body, repositoryName);
-        res.status(200).json(Utils.formatDates(entity));
-    } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
-    }
-});
-router.delete('', async (req, res) => {
-    try {
-        const id = req.query.id;
-        const result = await Repository.delete(id, repositoryName);
-        res.status(200).json(result);
-    } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
-    }
-});
-
-router.post('/register', async (req, res) => {
     const { user_id, course_id, adviser_id } = req.body;
     try {
-        const student = await QueryRepository.getStudentByCourseIdAndUserId(course_id, user_id);
+        const student = await Repository.query(
+            'students',
+            [
+                ['user_id', '==', user_id],
+                ['course_id', '==', course_id]
+            ]
+        );
         if (student) {
             return res.status(201).json({
                 id: student.id,
@@ -106,10 +57,52 @@ router.post('/register', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+router.get('', async (req, res) => {
+    try {
+        const id = req.query.id;
+        const state = req.query.state;
+        const courseId = req.query.course_id;
+        var entities;
+        if (id) {
+            const entity = await Repository.getById(id, repositoryName);
+            entities = entity ? [entity] : [];
+        } else {
+            const filters = [];
+            if (state) {
+                filters.push(['state', '==', state]);
+            }
+            if (courseId) {
+                filters.push(['course_id', '==', courseId]);
+                filters.push(['state', '==', 'active']);
+            }
+            entities = await Repository.query(repositoryName, filters);
+        }
+        res.status(200).json(entities.map(Utils.formatDates));
+    } catch (error) {
+        console.error(error);
+        res.status(412).json({ message: error.message });
+    }
+});
+router.patch('', async (req, res) => {
+    try {
+        const id = req.query.id;
+        const entity = await Repository.update(id, req.body, repositoryName);
+        res.status(200).json(Utils.formatDates(entity));
+    } catch (error) {
+        console.error(error);
+        res.status(412).json({ message: error.message });
+    }
+});
+
 router.get('/courses', async (req, res) => {
     try {
         const userId = req.query.user_id;
-        const entities = await QueryRepository.getCoursesByUserId(userId);
+        const entities = await Repository.query(
+            'students',
+            [
+                ['user_id', '==', userId]
+            ]
+        );
         res.status(200).json(entities.map(entity => ({
             course_id: entity.course_id,
             course_name: entity.course_name,
@@ -125,12 +118,30 @@ router.get('/data', async (req, res) => {
     try {
         const adviserId = req.query.adviser_id;
         const coordinatorId = req.query.coordinator_id;
-        let entities = [];
+        const teacherId = req.query.teacher_id;
+        const courseId = req.query.course_id;
+
+        let modulesTotal = 0;
+        let contentId = '';
+
+        const filters = [];
         if (adviserId) {
-            entities = await QueryRepository.getStudentsByAdviserId(adviserId);
-        } else {
-            entities = await QueryRepository.getStudentsByCoordinatorId(coordinatorId);
+            filters.push(['adviser_id', '==', adviserId]);
         }
+        if (coordinatorId) {
+            filters.push(['coordinator_id', '==', coordinatorId]);
+        }
+        if (courseId) {
+            filters.push(['course_id', '==', courseId]);
+            filters.push(['state', '==', 'active']);
+
+            const course = await Repository.getById(courseId, 'courses');
+            const content = await Repository.getById(course.content_id, 'contents');
+            modules = content.modules.length;
+            contentId = course.content_id;
+        }
+        const entities = await Repository.query(repositoryName, filters);
+
         const response = await Promise.all(
             entities.map(async entity => {
                 const user = await Repository.getById(entity.user_id, 'users');
@@ -140,7 +151,11 @@ router.get('/data', async (req, res) => {
                     name: user?.first_name + ' ' + user?.last_name + ' ' + user?.second_last_name,
                     course_name: entity.course_name,
                     phone: user?.phone,
-                    state: user?.state
+                    state: entity.state,
+                    modulesTotal: modulesTotal,
+                    notes: entity.notes,
+                    content_id: contentId,
+                    total_paid: entity.payments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0)
                 };
             }
             ));
@@ -249,7 +264,12 @@ router.get('/control', async (req, res) => {
     try {
         const courseId = req.query.course_id;
         const course = await Repository.getById(courseId, 'courses');
-        var entities = await QueryRepository.getStudentsByCourseId(courseId);
+        var entities = await Repository.query(
+            'students',
+            [
+                ['course_id', '==', courseId]
+            ]
+        );
 
         const students = await Promise.all(
             entities.map(async entity => {

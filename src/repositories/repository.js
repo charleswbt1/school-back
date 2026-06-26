@@ -7,28 +7,8 @@ class Repository {
         return getDb().collection(collectionName);
     }
 
-    async getAll(collectionName) {
-        const snapshot = await this
-            .getCollection(collectionName)
-            .get();
-        return snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
-    }
-
-    async getByState(state, collectionName) {
-        const snapshot = await this
-            .getCollection(collectionName)
-            .where('state', '==', state)
-            .get();
-        return snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
-    }
-
     async getById(id, collectionName) {
+        console.log(id);
         const ref = this
             .getCollection(collectionName)
             .doc(id);
@@ -40,6 +20,26 @@ class Repository {
             id: doc.id,
             ...doc.data()
         };
+    }
+
+    async query(collectionName, filters = [], orderBy = null, limit = null) {
+        let ref = this.getCollection(collectionName);
+
+        for (const [field, op, value] of filters) {
+            ref = ref.where(field, op, value);
+        }
+        if (orderBy) {
+            ref = ref.orderBy(orderBy.field, orderBy.direction || 'asc');
+        }
+        if (limit) {
+            ref = ref.limit(limit);
+        }
+
+        const snapshot = await ref.get();
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
     }
 
     async create(data, collectionName, state) {
@@ -88,7 +88,7 @@ class Repository {
         };
     }
 
-    async delete(id, collectionName) {
+    async softDelete(id, collectionName) {
         const ref = this
             .getCollection(collectionName)
             .doc(id);
@@ -99,6 +99,18 @@ class Repository {
         await ref.update({ state: 'inactive' });
         return {
             message: 'Deleted successfully'
+        };
+    }
+
+    async validUnique(key, value) {
+        const ref = this.getCollection('users')
+            .where(key, '==', value)
+            .limit(1);
+        const snapshot = await ref.get();
+        return {
+            item: key,
+            valid: snapshot.empty,
+            message: snapshot.empty ? `${key} is available` : `${key} is already taken`
         };
     }
 
