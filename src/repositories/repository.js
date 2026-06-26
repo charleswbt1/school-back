@@ -1,4 +1,5 @@
 const { getDb } = require('../config/firebase.js');
+const admin = require('firebase-admin');
 
 class Repository {
 
@@ -46,10 +47,11 @@ class Repository {
             .replace(/s$/, '')
             .substring(0, 3)
             .toUpperCase();
+        const cleanData = this.removeUndefined(data);
         const newData = {
             id: `${prefix}_${Date.now()}`,
             state: state || 'active',
-            ...JSON.parse(JSON.stringify(data)),
+            ...cleanData,
             createdAt: new Date(),
             updatedAt: new Date()
         };
@@ -73,8 +75,10 @@ class Repository {
         if (!doc.exists) {
             throw new Error(`${collectionName} ${id} not found`);
         }
+
+        const cleanData = this.removeUndefined(data);
         await ref.update({
-            ...JSON.parse(JSON.stringify(data)),
+            ...cleanData,
             updatedAt: new Date()
         });
         const updatedDoc = await ref.get();
@@ -96,6 +100,34 @@ class Repository {
         return {
             message: 'Deleted successfully'
         };
+    }
+
+    removeUndefined(obj) {
+        if (Array.isArray(obj)) {
+            return obj.map(item => this.removeUndefined(item));
+        }
+
+        if (
+            obj instanceof Date ||
+            obj instanceof admin.firestore.Timestamp ||
+            obj instanceof admin.firestore.GeoPoint ||
+            obj instanceof admin.firestore.DocumentReference
+        ) {
+            return obj;
+        }
+
+        if (obj && typeof obj === 'object') {
+            return Object.fromEntries(
+                Object.entries(obj)
+                    .filter(([, value]) => value !== undefined)
+                    .map(([key, value]) => [
+                        key,
+                        this.removeUndefined(value)
+                    ])
+            );
+        }
+
+        return obj;
     }
 }
 
