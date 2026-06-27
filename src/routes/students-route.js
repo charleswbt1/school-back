@@ -292,6 +292,7 @@ router.get('/control', async (req, res) => {
                     phone: user?.phone,
                     state: entity?.state,
                     school_id: entity.school_id,
+                    adviser_id: entity.adviser_id,
                     payments: entity.payments || [],
                     documents: entity.documents || []
                 };
