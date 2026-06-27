@@ -8,7 +8,6 @@ class Repository {
     }
 
     async getById(id, collectionName) {
-        console.log(id);
         const ref = this
             .getCollection(collectionName)
             .doc(id);

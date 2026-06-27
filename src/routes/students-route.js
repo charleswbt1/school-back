@@ -17,10 +17,10 @@ router.post('', async (req, res) => {
                 ['course_id', '==', course_id]
             ]
         );
-        if (student) {
+        if (student.length > 0) {
             return res.status(201).json({
-                id: student.id,
-                user_id: student.user_id
+                id: student[0].id,
+                user_id: student[0].user_id
             });
         }
         const course = await Repository.getById(course_id, 'courses');
