@@ -124,12 +124,22 @@ router.get('/data', async (req, res) => {
         let modulesTotal = 0;
         let contentId = '';
 
+        let entities = [];
         const filters = [];
         if (adviserId) {
-            filters.push(['adviser_id', '==', adviserId]);
+            const courses = await Repository.query('courses', [
+                ['adviser_id', '==', adviserId]
+            ]);
+            for (const course of courses) {
+                const students = await Repository.query(repositoryName, [
+                    ['course_id', '==', course.id]
+                ]);
+                entities.push(...students);
+            }
         }
         if (coordinatorId) {
             filters.push(['coordinator_id', '==', coordinatorId]);
+            entities = await Repository.query(repositoryName, filters);
         }
         if (courseId) {
             filters.push(['course_id', '==', courseId]);
@@ -139,8 +149,8 @@ router.get('/data', async (req, res) => {
             const content = await Repository.getById(course.content_id, 'contents');
             modules = content.modules.length;
             contentId = course.content_id;
+            entities = await Repository.query(repositoryName, filters);
         }
-        const entities = await Repository.query(repositoryName, filters);
 
         const response = await Promise.all(
             entities.map(async entity => {
@@ -155,7 +165,8 @@ router.get('/data', async (req, res) => {
                     modulesTotal: modulesTotal,
                     notes: entity.notes,
                     content_id: contentId,
-                    total_paid: entity.payments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0)
+                    total_paid: entity.payments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0),
+                    adviser_id: entity.adviser_id
                 };
             }
             ));
