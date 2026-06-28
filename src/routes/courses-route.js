@@ -86,6 +86,8 @@ router.get('', async (req, res) => {
             }
             if (coordinatorId) {
                 filters.push(['coordinator_id', '==', coordinatorId]);
+            }
+            if (year && month) {
                 filters.push(['year', '==', year]);
                 filters.push(['month', '==', month]);
             }
@@ -120,12 +122,11 @@ router.patch('', async (req, res) => {
 router.get('/periods', async (req, res) => {
     try {
         const coordinatorId = req.query.coordinator_id;
-        const entities = await Repository.query(
-            'periods',
-            [
-                ['coordinator_id', '==', coordinatorId]
-            ]
-        );
+        const filters = [];
+        if (coordinatorId) {
+            filters.push(['coordinator_id', '==', coordinatorId]);
+        }
+        const entities = await Repository.query('periods', filters);
         res.status(200).json(entities.map(Utils.formatDates));
     } catch (error) {
         console.error(error);

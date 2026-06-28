@@ -147,7 +147,7 @@ router.get('/data', async (req, res) => {
 
             const course = await Repository.getById(courseId, 'courses');
             const content = await Repository.getById(course.content_id, 'contents');
-            modules = content.modules.length;
+            modulesTotal = content.modules.length;
             contentId = course.content_id;
             entities = await Repository.query(repositoryName, filters);
         }
