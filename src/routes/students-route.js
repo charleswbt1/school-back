@@ -160,6 +160,7 @@ router.get('/data', async (req, res) => {
                     curp: user?.curp,
                     name: user?.first_name + ' ' + user?.last_name + ' ' + user?.second_last_name,
                     course_name: entity.course_name,
+                    course_id: entity.course_id,
                     phone: user?.phone,
                     state: entity.state,
                     modulesTotal: modulesTotal,
