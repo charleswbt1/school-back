@@ -11,6 +11,9 @@ const repositoryName = 'courses';
 router.post('', async (req, res) => {
     try {
         const request = new CourseRegisterRequest(req.body);
+        if (!request.coordinator_id || !request.teacher_id || !request.content_id || !request.name || !request.date_init) {
+            throw new Error('Faltan datos obligatorios');
+        }
         const content = await Repository.getById(request.content_id, "contents");
         request.content = new ContentRegisterRequest(content);
 

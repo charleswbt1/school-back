@@ -72,7 +72,7 @@ class Repository {
             .doc(id);
         const doc = await ref.get();
         if (!doc.exists) {
-            throw new Error(`${collectionName} ${id} not found`);
+            throw new Error(`${collectionName} ${id} no encontrado`);
         }
 
         const cleanData = this.removeUndefined(data);
@@ -93,11 +93,11 @@ class Repository {
             .doc(id);
         const doc = await ref.get();
         if (!doc.exists) {
-            throw new Error(`${collectionName} ${id} not found`);
+            throw new Error(`${collectionName} ${id} no encontrado`);
         }
         await ref.update({ state: 'inactive' });
         return {
-            message: 'Deleted successfully'
+            message: 'Eliminado exitosamente'
         };
     }
 
@@ -109,7 +109,7 @@ class Repository {
         return {
             item: key,
             valid: snapshot.empty,
-            message: snapshot.empty ? `${key} is available` : `${key} is already taken`
+            message: snapshot.empty ? `${key} es disponible` : `${key} ya está en uso`
         };
     }
 
