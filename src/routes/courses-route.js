@@ -22,7 +22,7 @@ router.post('', async (req, res) => {
         const periods = await Repository.query(
             'periods',
             [
-                ['coordinator_id', '==', request.coordinator_id]
+                ['coordinator_id', '==', request.coordinator_id],
                 ['year', '==', year],
                 ['month', '==', month]
             ]
