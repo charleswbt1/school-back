@@ -43,24 +43,6 @@ router.post('', async (req, res) => {
             }
             await Repository.create(newPeriod, 'periods');
         }
-        const teachers = await Repository.query(
-            'teachers',
-            [
-                ['user_id', '==', request.teacher_id]
-            ]
-        );
-        if (teachers.length > 0) {
-            const teacher = teachers[0];
-            teacher.courses.push(request.name);
-            await Repository.update(teacher.id, teacher, 'teachers');
-        } else {
-            const newTeacher = {
-                user_id: request.teacher_id,
-                courses: [request.name]
-            }
-            await Repository.create(newTeacher, 'teachers');
-        }
-
         const entity = await Repository.create(request, repositoryName);
         res.status(201).json(Utils.formatDates(entity));
     } catch (error) {
@@ -147,6 +129,29 @@ router.get('/student', async (req, res) => {
             course: course,
             content: content
         });
+    } catch (error) {
+        console.error(error);
+        res.status(412).json({ message: error.message });
+    }
+});
+router.get('/teachers', async (req, res) => {
+    try {
+        const teachers = await Repository.query('users', [['role', '==', 'teacher']]);
+        const today = new Date().toISOString().split('T')[0];
+        const courses = await Repository.query(
+            'courses', [
+            ['state', '==', 'active'],
+            ['date_init', '<', today]
+        ]
+        );
+        const response = teachers.map(teacher => {
+            const teacherCourses = courses.filter(course => course.teacher_id === teacher.id);
+            return {
+                ...teacher,
+                courses: teacherCourses
+            };
+        });
+        res.status(200).json(response);
     } catch (error) {
         console.error(error);
         res.status(412).json({ message: error.message });

@@ -29,6 +29,7 @@ class CourseRegisterRequest {
         state,
         call_link,
         class_link,
+        hours_week,
         exam_link = []
     }) {
         this.name = name;
@@ -58,6 +59,7 @@ class CourseRegisterRequest {
         this.state = state;
         this.call_link = call_link;
         this.class_link = class_link;
+        this.hours_week = hours_week;
         this.exam_link = exam_link;
     }
 }

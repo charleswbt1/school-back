@@ -188,6 +188,7 @@ router.post('/bill', async (req, res) => {
             return res.status(409).json({ message: 'No se encontró al estudiante' });
         }
         student.payments.push({
+            id: `PAY_${Date.now()}`,
             amount,
             source: source,
             date: new Date(),
