@@ -43,6 +43,7 @@ router.post('', async (req, res) => {
                 payments: [],
                 documents: [],
                 notes: [],
+                progresses: [],
                 state: 'pending'
             }),
             repositoryName,
@@ -239,7 +240,7 @@ router.post('/document', async (req, res) => {
     }
 });
 router.post('/qualification', async (req, res) => {
-    const { module_name, qualification, student_id } = req.body;
+    const { module_id, qualification, student_id, state } = req.body;
     try {
         if (qualification <= 0 || qualification > 10) {
             return res.status(400).json({ message: 'Calificación no válida' });
@@ -251,14 +252,14 @@ router.post('/qualification', async (req, res) => {
         if (!student.notes) {
             student.notes = [];
         }
-        const note = student.notes.find(note => note.module === module_name);
+        const note = student.notes.find(note => note.module_id === module_id);
         if (note) {
             note.value = Number(qualification);
         } else {
             student.notes.push({
-                module: module_name,
+                module_id: module_id,
                 value: Number(qualification),
-                state: 'aprobado'
+                state: state
             })
         }
         student.average = student.notes.length > 0

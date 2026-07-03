@@ -14,14 +14,16 @@ router.post('', async (req, res) => {
         if (!request.coordinator_id || !request.teacher_id || !request.content_id || !request.name || !request.date_init) {
             throw new Error('Faltan datos obligatorios');
         }
-        const content = await Repository.getById(request.content_id, "contents");
-        request.content = new ContentRegisterRequest(content);
-
         const toDay = new Date(request.date_init);
         const month = toDay.toLocaleString('es-MX', { month: 'long' }).toUpperCase();
         const year = toDay.getFullYear();
         request.month = month;
         request.year = `${year}`;
+        request.cost_inscription = request.offer_cost_inscription + 500;
+        request.cost_quota = request.offer_cost_quota + 1000;
+        request.cost_reinscription = request.offer_cost_reinscription + 1000;
+        request.cost_title = request.offer_cost_title + 10000;
+
         const periods = await Repository.query(
             'periods',
             [
@@ -30,6 +32,8 @@ router.post('', async (req, res) => {
                 ['month', '==', month]
             ]
         );
+        const entity = await Repository.create(request, repositoryName);
+
         if (periods.length > 0) {
             const period = periods[0];
             period.courses.push(request.name);
@@ -39,11 +43,11 @@ router.post('', async (req, res) => {
                 coordinator_id: request.coordinator_id,
                 month: month,
                 year: year,
-                courses: [request.name]
+                courses: [request.name],
+                coursesId: [entity.id]
             }
             await Repository.create(newPeriod, 'periods');
         }
-        const entity = await Repository.create(request, repositoryName);
         res.status(201).json(Utils.formatDates(entity));
     } catch (error) {
         console.error(error);
@@ -152,6 +156,24 @@ router.get('/teachers', async (req, res) => {
             };
         });
         res.status(200).json(response);
+    } catch (error) {
+        console.error(error);
+        res.status(412).json({ message: error.message });
+    }
+});
+router.patch('/change', async (req, res) => {
+    try {
+        const courseOriginId = req.query.course_origin_id;
+        const courseDestinationId = req.query.course_destination_id;
+        const entity = await Repository.query('students', [['course_id', '==', courseOriginId]]);
+        for (const student of entity) {
+            student.course_id = courseDestinationId;
+            await Repository.update(student.id, student, 'students');
+        }
+        await Repository.update(courseOriginId, { state: 'inactive' }, 'courses');
+        res.status(200).json({
+            message: 'Estudiantes transferidos correctamente'
+        });
     } catch (error) {
         console.error(error);
         res.status(412).json({ message: error.message });

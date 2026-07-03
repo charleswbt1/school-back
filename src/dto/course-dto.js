@@ -10,7 +10,6 @@ class CourseRegisterRequest {
         adviser_id,
         teacher_id,
         image,
-        cost,
         cost_inscription,
         offer_cost_inscription,
         cost_quota,
@@ -23,14 +22,12 @@ class CourseRegisterRequest {
         rvoe,
         date_init,
         date_end,
-        content,
         month,
         year,
         state,
         call_link,
         class_link,
-        hours_week,
-        exam_link = []
+        hours_week
     }) {
         this.name = name;
         this.description = description;
@@ -40,7 +37,6 @@ class CourseRegisterRequest {
         this.adviser_id = adviser_id;
         this.teacher_id = teacher_id;
         this.image = image;
-        this.cost = cost;
         this.cost_inscription = cost_inscription;
         this.offer_cost_inscription = offer_cost_inscription;
         this.cost_quota = cost_quota;
@@ -53,14 +49,12 @@ class CourseRegisterRequest {
         this.rvoe = rvoe;
         this.date_init = date_init;
         this.date_end = date_end;
-        this.content = content ? new ContentRegisterRequest(content) : null;
         this.month = month;
         this.year = year;
         this.state = state;
         this.call_link = call_link;
         this.class_link = class_link;
         this.hours_week = hours_week;
-        this.exam_link = exam_link;
     }
 }
 

@@ -20,6 +20,7 @@ router.get('', async (req, res) => {
     try {
         const id = req.query.id;
         const state = req.query.state;
+        const coordinatorId = req.query.coordinator_id;
         var entities;
         if (id) {
             const entity = await Repository.getById(id, repositoryName);
@@ -28,6 +29,9 @@ router.get('', async (req, res) => {
             const filters = [];
             if (state) {
                 filters.push(['state', '==', state]);
+            }
+            if (coordinatorId) {
+                filters.push(['coordinator_id', '==', coordinatorId]);
             }
             entities = await Repository.query(repositoryName, filters);
         }

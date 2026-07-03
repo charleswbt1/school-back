@@ -30,11 +30,22 @@ class Document {
 }
 class Note {
     constructor({
-        module,
+        module_id,
         value,
         state
     }) {
-        this.module = module;
+        this.module_id = module_id;
+        this.value = value;
+        this.state = state;
+    }
+}
+class Progress {
+    constructor({
+        topic_id,
+        value,
+        state
+    }) {
+        this.topic_id = topic_id;
         this.value = value;
         this.state = state;
     }
@@ -57,7 +68,8 @@ class StudentRegisterRequest {
         state,
         payments,
         documents,
-        notes
+        notes,
+        progresses
     }) {
         this.school_id = school_id;
         this.user_id = user_id;
@@ -80,6 +92,9 @@ class StudentRegisterRequest {
         );
         this.notes = notes.map(
             note => new Note(note)
+        );
+        this.progresses = progresses.map(
+            progress => new Progress(progress)
         );
     }
 }
