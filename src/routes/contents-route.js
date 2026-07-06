@@ -2,13 +2,13 @@ const express = require('express');
 const router = express.Router();
 const Utils = require('../config/utils.js');
 const Repository = require('../repositories/repository.js');
-const ContentRegisterRequest = require('../dto/content-dto.js');
+const ContentDto = require('../dto/content-dto.js');
 
 const repositoryName = 'contents';
 
 router.post('', async (req, res) => {
     try {
-        const request = new ContentRegisterRequest(req.body);
+        const request = new ContentDto(req.body);
         const entity = await Repository.create(request, repositoryName);
         res.status(201).json(Utils.formatDates(entity));
     } catch (error) {

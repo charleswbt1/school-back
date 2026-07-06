@@ -2,8 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Utils = require('../config/utils.js');
 const Repository = require('../repositories/repository.js');
-const StudentRegisterRequest = require('../dto/student-dto.js');
-const ContentRegisterRequest = require('../dto/content-dto.js');
+const StudentDto = require('../dto/student-dto.js');
 
 const repositoryName = 'students';
 
@@ -26,7 +25,7 @@ router.post('', async (req, res) => {
         const course = await Repository.getById(course_id, 'courses');
         const content = await Repository.getById(course.content_id, 'contents');
         const newStudent = await Repository.create(
-            new StudentRegisterRequest({
+            new StudentDto({
                 school_id: '',
                 user_id: user_id,
                 course_id: course_id,

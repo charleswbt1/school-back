@@ -3,14 +3,14 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const Utils = require('../config/utils.js');
 const Repository = require('../repositories/repository.js');
-const UserRegisterRequest = require('../dto/user-dto.js');
+const UserDto = require('../dto/user-dto.js');
 
 const repositoryName = 'users';
 
 router.post('', async (req, res) => {
     try {
         req.body.password = await bcrypt.hash(req.body.password, 10);
-        const request = new UserRegisterRequest(req.body);
+        const request = new UserDto(req.body);
 
         const nickName = await Repository.validUnique('nick_name', request.nick_name);
         if (!nickName.valid) {

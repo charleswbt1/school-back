@@ -2,15 +2,13 @@ const express = require('express');
 const router = express.Router();
 const Utils = require('../config/utils.js');
 const Repository = require('../repositories/repository.js');
-const CourseRegisterRequest = require('../dto/course-dto.js');
-const ContentRegisterRequest = require('../dto/content-dto.js');
-const PeriodRegisterRequest = require('../dto/period-dto.js');
+const CourseDto = require('../dto/course-dto.js');
 
 const repositoryName = 'courses';
 
 router.post('', async (req, res) => {
     try {
-        const request = new CourseRegisterRequest(req.body);
+        const request = new CourseDto(req.body);
         if (!request.coordinator_id || !request.teacher_id || !request.content_id || !request.name || !request.date_init) {
             throw new Error('Faltan datos obligatorios');
         }

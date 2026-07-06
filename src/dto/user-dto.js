@@ -1,4 +1,4 @@
-class UserRegisterRequest {
+class UserDto {
     constructor({
         nick_name,
         password,
@@ -26,4 +26,4 @@ class UserRegisterRequest {
     }
 }
 
-module.exports = UserRegisterRequest;
+module.exports = UserDto;

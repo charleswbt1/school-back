@@ -32,7 +32,7 @@ class Module {
     }
 }
 
-class ContentRegisterRequest {
+class ContentDto {
     constructor({
         name,
         description,
@@ -50,4 +50,4 @@ class ContentRegisterRequest {
     }
 }
 
-module.exports = ContentRegisterRequest;
+module.exports = ContentDto;

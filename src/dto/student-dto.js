@@ -1,5 +1,3 @@
-const ContentRegisterRequest = require('../dto/content-dto.js');
-
 class Payment {
     constructor({
         id,
@@ -53,7 +51,7 @@ class Progress {
     }
 }
 
-class StudentRegisterRequest {
+class StudentDto {
     constructor({
         school_id,
         user_id,
@@ -101,4 +99,4 @@ class StudentRegisterRequest {
     }
 }
 
-module.exports = StudentRegisterRequest;
+module.exports = StudentDto;

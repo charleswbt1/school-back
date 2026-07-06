@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Utils = require('../config/utils.js');
 const Repository = require('../repositories/repository.js');
-const ContentRegisterRequest = require('../dto/content-dto.js');
 const ExamDto = require('../dto/exam-dto.js');
 
 const repositoryName = 'exams';

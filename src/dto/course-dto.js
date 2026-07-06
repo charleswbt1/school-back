@@ -1,6 +1,4 @@
-const ContentRegisterRequest = require('../dto/content-dto.js');
-
-class CourseRegisterRequest {
+class CourseDto {
     constructor({
         name,
         description,
@@ -58,4 +56,4 @@ class CourseRegisterRequest {
     }
 }
 
-module.exports = CourseRegisterRequest;
+module.exports = CourseDto;

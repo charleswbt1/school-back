@@ -1,4 +1,4 @@
-class PeriodRegisterRequest {
+class PeriodDto {
     constructor({
         coordinator_id,
         month,
@@ -16,4 +16,4 @@ class PeriodRegisterRequest {
     }
 }
 
-module.exports = PeriodRegisterRequest;
+module.exports = PeriodDto;

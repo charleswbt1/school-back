@@ -1,4 +1,4 @@
-class SquadRegisterRequest {
+class SquadDto {
     constructor({
         name,
         description,
@@ -14,4 +14,4 @@ class SquadRegisterRequest {
     }
 }
 
-module.exports = SquadRegisterRequest;
+module.exports = SquadDto;

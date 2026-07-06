@@ -2,13 +2,13 @@ const express = require('express');
 const router = express.Router();
 const Utils = require('../config/utils.js');
 const Repository = require('../repositories/repository.js');
-const SquadRegisterRequest = require('../dto/squad-dto.js');
+const SquadDto = require('../dto/squad-dto.js');
 
 const repositoryName = 'squads';
 
 router.post('', async (req, res) => {
     try {
-        const request = new SquadRegisterRequest(req.body);
+        const request = new SquadDto(req.body);
         const entity = await Repository.create(request, repositoryName);
         res.status(201).json(Utils.formatDates(entity));
     } catch (error) {
