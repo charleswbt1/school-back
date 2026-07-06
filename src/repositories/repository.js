@@ -87,6 +87,20 @@ class Repository {
         };
     }
 
+    async delete(id, collectionName) {
+        const ref = this
+            .getCollection(collectionName)
+            .doc(id);
+        const doc = await ref.get();
+        if (!doc.exists) {
+            throw new Error(`${collectionName} ${id} no encontrado`);
+        }
+        await ref.delete();
+        return {
+            message: 'Eliminado exitosamente'
+        };
+    }
+
     async softDelete(id, collectionName) {
         const ref = this
             .getCollection(collectionName)

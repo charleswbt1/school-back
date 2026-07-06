@@ -32,11 +32,13 @@ class Note {
     constructor({
         module_id,
         value,
-        state
+        state,
+        attempts
     }) {
         this.module_id = module_id;
         this.value = value;
         this.state = state;
+        this.attempts = attempts;
     }
 }
 class Progress {
