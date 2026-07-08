@@ -12,6 +12,9 @@ router.post('', async (req, res) => {
         if (!request.coordinator_id || !request.teacher_id || !request.content_id || !request.name || !request.date_init) {
             throw new Error('Faltan datos obligatorios');
         }
+        const squad = await Repository.getById(request.squad_id, 'squads');
+        request.image = squad.logo;
+
         const toDay = new Date(request.date_init);
         const month = toDay.toLocaleString('es-MX', { month: 'long' }).toUpperCase();
         const year = toDay.getFullYear();
@@ -21,6 +24,7 @@ router.post('', async (req, res) => {
         request.cost_quota = request.offer_cost_quota + 1000;
         request.cost_reinscription = request.offer_cost_reinscription + 1000;
         request.cost_title = request.offer_cost_title + 10000;
+        request.cost_title_two = request.offer_cost_title_two + 10000;
 
         const periods = await Repository.query(
             'periods',

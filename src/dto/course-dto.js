@@ -2,6 +2,7 @@ class CourseDto {
     constructor({
         name,
         description,
+        type,
         coordinator_id,
         squad_id,
         content_id,
@@ -16,6 +17,8 @@ class CourseDto {
         offer_cost_reinscription,
         cost_title,
         offer_cost_title,
+        cost_title_two,
+        offer_cost_title_two,
         number_quota,
         rvoe,
         date_init,
@@ -29,6 +32,7 @@ class CourseDto {
     }) {
         this.name = name;
         this.description = description;
+        this.type = type;
         this.coordinator_id = coordinator_id;
         this.squad_id = squad_id;
         this.content_id = content_id;
@@ -43,6 +47,8 @@ class CourseDto {
         this.offer_cost_reinscription = offer_cost_reinscription;
         this.cost_title = cost_title;
         this.offer_cost_title = offer_cost_title;
+        this.cost_title_two = cost_title_two;
+        this.offer_cost_title_two = offer_cost_title_two;
         this.number_quota = number_quota;
         this.rvoe = rvoe;
         this.date_init = date_init;
