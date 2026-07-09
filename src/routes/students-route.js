@@ -254,6 +254,7 @@ router.post('/qualification', async (req, res) => {
         const note = student.notes.find(note => note.module_id === module_id);
         if (note) {
             note.value = Number(qualification);
+            note.state = state;
         } else {
             student.notes.push({
                 module_id: module_id,

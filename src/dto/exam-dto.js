@@ -22,12 +22,16 @@ class ExamDto {
         teacher_id,
         name,
         description,
+        approve,
+        state,
         questions = []
     }) {
         this.coordinator_id = coordinator_id;
         this.teacher_id = teacher_id;
         this.name = name;
         this.description = description;
+        this.approve = approve;
+        this.state = state;
         this.questions = questions.map(question => new QuestionDto(question));
     }
 }

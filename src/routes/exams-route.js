@@ -78,7 +78,11 @@ router.get('/questions', async (req, res) => {
                 answers: answers,
             };
         });
-        res.status(200).json({ id, questions });
+        res.status(200).json({
+            id: id,
+            name: entity.name,
+            questions: questions
+        });
     } catch (error) {
         res.status(412).json({ message: error.message });
     }
@@ -90,18 +94,24 @@ router.post('/evaluate', async (req, res) => {
         if (!exam) {
             throw new Error('No se encontró el examen');
         }
-        const answersSuccess = exam.questions.map((question) => {
-            question.answers.find((answer) => answer.is_correct === true).answer;
+
+        if (request.answers.length !== exam.questions.length) {
+            return res.status(400).json({
+                message: "Número de respuestas incorrecto"
+            });
+        }
+
+        let score = 0;
+        exam.questions.forEach((question, i) => {
+            const correctIndex = question.answers.findIndex(a => a.is_correct);
+            if (request.answers[i].selected === correctIndex) {
+                score++;
+            }
         });
 
-        const score = request.answers.reduce((acc, answer, index) => {
-            if (answer.answer === answersSuccess[index]) {
-                return acc + 1;
-            }
-            return acc;
-        }, 0);
-        const average = (score / exam.questions.length) * 10;
-        res.status(201).json({ score, average });
+        const average = Number(((score / exam.questions.length) * 10).toFixed(1));
+        const approved = average >= exam.approve;
+        res.status(201).json({ score, average, approved });
     } catch (error) {
         res.status(409).json({ message: error.message });
     }
