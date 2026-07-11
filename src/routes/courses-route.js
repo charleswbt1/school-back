@@ -110,6 +110,50 @@ router.patch('', async (req, res) => {
     }
 });
 
+router.get('/review', async (req, res) => {
+    try {
+        const year = req.query.year;
+        const month = req.query.month;
+
+        const courses = await Repository.query(repositoryName);
+        const students = await Repository.query('students');
+        const coordinators = await Repository.query('users', [['role', '==', 'coordinator']]);
+
+        const review = coordinators.map(coordinator => {
+            const coordinatorCourses = courses.filter(course => course.coordinator_id === coordinator.id);
+
+            const courseReview = coordinatorCourses.map(course => {
+                let count = 0;
+                const courseStudents = students.filter(student => student.course_id === course.id);
+                const amount = courseStudents.reduce((sum, student) => {
+                    const payTotal = (student.payments || [])
+                        .filter(payment => payment.year === year && payment.month === month)
+                        .reduce((paymentSum, payment) => paymentSum + (Number(payment.amount) || 0), 0);
+                    if (payTotal > 0) {
+                        count++;
+                    }
+                    return sum + payTotal;
+                }, 0);
+
+                return {
+                    course_name: course.name,
+                    students: courseStudents.length,
+                    paymentStudents: count,
+                    amount: amount
+                };
+            });
+
+            return {
+                coordinator_name: `${coordinator.first_name} ${coordinator.last_name} ${coordinator.second_last_name}`,
+                courses: courseReview.filter(review => review.amount > 0)
+            };
+        });
+        res.status(200).json(review);
+    } catch (error) {
+        console.error(error);
+        res.status(412).json({ message: error.message });
+    }
+});
 router.get('/periods', async (req, res) => {
     try {
         const coordinatorId = req.query.coordinator_id;
@@ -130,6 +174,11 @@ router.get('/student', async (req, res) => {
         const student = await Repository.getById(studentId, 'students');
         const course = await Repository.getById(student.course_id, 'courses');
         const content = await Repository.getById(course.content_id, 'contents');
+
+        const payTotal = student.payments.reduce((total, payment) => total += Number(payment.amount), 0);
+        const availableModules = Math.max(0, Math.floor((payTotal - 500) / 500));
+        content.modules.forEach((module, index) => { module.available = index < availableModules; });
+
         res.status(200).json({
             student: student,
             course: course,

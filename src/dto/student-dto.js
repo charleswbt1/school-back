@@ -1,6 +1,7 @@
 class Payment {
     constructor({
         id,
+        type,
         year,
         month,
         amount,
@@ -9,6 +10,7 @@ class Payment {
         source
     }) {
         this.id = id;
+        this.type = type;
         this.year = year;
         this.month = month;
         this.amount = amount;

@@ -24,6 +24,7 @@ class ExamDto {
         description,
         approve,
         state,
+        theme,
         questions = []
     }) {
         this.coordinator_id = coordinator_id;
@@ -32,6 +33,7 @@ class ExamDto {
         this.description = description;
         this.approve = approve;
         this.state = state;
+        this.theme = theme;
         this.questions = questions.map(question => new QuestionDto(question));
     }
 }

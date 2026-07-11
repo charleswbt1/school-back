@@ -5,7 +5,7 @@ class Topic {
         description,
         link
     }) {
-        this.id = id|| `TOP_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+        this.id = id || `TOP_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
         this.name = name;
         this.description = description;
         this.link = link;
@@ -18,6 +18,7 @@ class Module {
         name,
         description,
         qualification,
+        available,
         link,
         topics = []
     }) {
@@ -25,6 +26,7 @@ class Module {
         this.name = name;
         this.description = description;
         this.qualification = qualification;
+        this.available = available;
         this.link = link;
         this.topics = topics.map(
             topic => new Topic(topic)
