@@ -178,7 +178,7 @@ router.get('/data', async (req, res) => {
     }
 });
 router.post('/bill', async (req, res) => {
-    const { url, amount, student_id, year, month, source } = req.body;
+    const { url, amount, student_id, year, month, type, source } = req.body;
     try {
         if (amount <= 0) {
             return res.status(400).json({ message: 'Monto no válido' });
@@ -190,6 +190,7 @@ router.post('/bill', async (req, res) => {
         student.payments.push({
             id: `PAY_${Date.now()}`,
             amount,
+            type,
             source: source,
             date: new Date(),
             year: `${year}`,
