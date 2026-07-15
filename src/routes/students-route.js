@@ -124,17 +124,26 @@ router.get('/data', async (req, res) => {
         let modulesTotal = 0;
         let contentId = '';
 
-        let entities = [];
         const filters = [];
+        let entities = [];
+
         if (adviserId) {
-            const courses = await Repository.query('courses', [
-                ['adviser_id', '==', adviserId]
+            const today = new Date().toISOString().split('T')[0];
+            const coursesAvaliables = await Repository.query('courses', [
+                ['state', '==', 'active'],
+                ['date_init', '>=', today]
             ]);
+            const courses = coursesAvaliables.filter(course => course.adviser_id === adviserId);
             for (const course of courses) {
                 const students = await Repository.query(repositoryName, [
                     ['course_id', '==', course.id]
                 ]);
-                entities.push(...students);
+                entities.push(
+                    ...students.map(student => ({
+                        ...student,
+                        date_init: course.date_init
+                    }))
+                );
             }
         }
         if (coordinatorId) {
@@ -167,7 +176,9 @@ router.get('/data', async (req, res) => {
                     notes: entity.notes,
                     content_id: contentId,
                     total_paid: entity.payments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0),
-                    adviser_id: entity.adviser_id
+                    adviser_id: entity.adviser_id,
+                    date_init: entity.date_init,
+                    payments: entity.payments
                 };
             }
             ));
