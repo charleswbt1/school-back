@@ -24,7 +24,8 @@ router.post(
                     newName = 'payment';
                 }
                 const file = req.files.reqFile[0];
-                path = `${directory}/${Date.now()}-${newName}`;
+                const extension = file.mimetype.split('/')[1];
+                path = `${directory}/${Date.now()}-${newName}.${extension}`;
                 const refBucket = bucket.file(path);
 
                 await refBucket.save(
