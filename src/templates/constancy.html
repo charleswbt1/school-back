@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Constancia de Estudios</title>
+ <style>
+    *{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    background:#efefef;
+
+    font-family:Arial, Helvetica, sans-serif;
+
+    display:flex;
+
+    justify-content:center;
+
+    padding:40px;
+
+}
+
+.documento{
+
+    width:850px;
+
+    background:white;
+
+    padding:60px;
+
+    color:#000;
+
+    box-shadow:0 0 15px rgba(0,0,0,.15);
+
+}
+.header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    border-bottom:3px solid #173b73;
+
+    padding-bottom:20px;
+
+    margin-bottom:60px;
+
+}
+
+.header-left{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:20px;
+
+}
+
+.logo{
+
+    width:110px;
+
+    height:auto;
+
+}
+
+.school-info h2{
+
+    margin:0;
+
+    font-size:18px;
+
+    color:#173b73;
+
+    letter-spacing:2px;
+
+}
+
+.school-info h1{
+
+    margin:0;
+
+    font-size:34px;
+
+    color:#173b73;
+
+    font-weight:bold;
+
+}
+
+.school-info p{
+
+    margin-top:5px;
+
+    color:#666;
+
+    font-size:15px;
+
+}
+
+.header-right{
+
+    text-align:right;
+
+    font-size:16px;
+
+    color:#173b73;
+
+    line-height:1.8;
+
+}
+
+h1{
+
+    text-align:center;
+
+    font-size:42px;
+
+    margin-bottom:80px;
+
+    font-weight:bold;
+
+}
+
+.saludo{
+
+    font-size:24px;
+
+    margin-bottom:30px;
+
+}
+
+.contenido{
+
+    font-size:22px;
+
+    text-align:justify;
+
+    line-height:1.8;
+
+    margin-bottom:25px;
+
+}
+
+span{
+
+    color:#0038ff;
+
+}
+
+.firma{
+
+    margin-top:120px;
+
+    text-align:center;
+
+    font-size:22px;
+
+}
+
+ </style> 
+</head>
+
+<body>
+
+<div class="documento">
+
+    <header class="header">
+
+    <div class="header-left">
+
+        <img
+            src="https://storage.googleapis.com/school-source/web/logo.png"
+            alt="Instituto Universitario Conecta"
+            class="logo">
+
+        <div class="school-info">
+
+            <h2>INSTITUTO UNIVERSITARIO</h2>
+
+            <h1>CONECTA</h1>
+
+            <p>Educación para Transformar</p>
+
+        </div>
+
+    </div>
+
+    <div class="header-right">
+
+        <p>Actopan, Hidalgo</p>
+
+        <p>17 de julio de 2026</p>
+
+    </div>
+
+</header>
+
+    <h1>CONSTANCIA DE ESTUDIOS</h1>
+
+
+    <p class="saludo">
+        A quién corresponda:
+    </p>
+
+
+    <p class="contenido">
+
+        Por medio de la presente,
+
+        hago constar que:
+
+        <span>{{name}}</span>,
+
+        es estudiante regular de nuestra institución.
+
+        Este se encuentra cursando
+
+        <span>{{course}}</span>
+
+        con matrícula
+
+        <span>{{schoolId}}</span>.
+
+    </p>
+
+    <p class="contenido">
+
+        La presente se entrega a petición de la parte interesada para los fines que le convengan.
+
+    </p>
+
+    <br><br><br><br>
+
+    <div class="firma">
+
+        ________________________________
+
+        <br>
+
+        Director(a) Académico(a)
+
+    </div>
+
+</div>
+
+</body>
+</html>
