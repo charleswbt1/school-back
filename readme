@@ -11,3 +11,27 @@ gcloud run deploy school-back \
 gcloud run services update school-back \
   --region us-east1 \
   --set-env-vars="GOOGLE_CLOUD_PROJECT=project-89b7d84d-e1c0-4688-88a,FIREBASE_STORAGE_BUCKET=school-source"
+
+COORDINADOR: 
+realizar plantilla para constancia 
+Modal control de alumno 
+
+ADMIN:
+front/back - tabla concentradora -------
+Conteo de pagos de titulo 
+
+
+ASESOR:
+back - migracion de grupo
+
+GENERAL: 
+Cambio de busqueda de alumnos 
+Homologar arquitectura web 
+Examenes: apartir de los archivos recibidos (1) 
+Animacion: celebracion al completar modulo 
+
+ALUMNO:
+Quitar fechas de curso bachillerato 
+
+BACK: 
+Integracion con stripe 

@@ -61,11 +61,14 @@ router.post('/constancy', async (req, res) => {
             'utf8'
         );
 
+        const logo = 'file://' + path.join(__dirname, '../templates/logo.jpg');
+
         html = html
             .replace('{{name}}', student_name)
             .replace('{{course}}', course_name)
             .replace('{{schoolId}}', school_id)
-            .replace('{{date}}', dateText);
+            .replace('{{date}}', dateText)
+            .replace('{{logo}}', logo);
 
         const browser = await puppeteer.launch({
             headless: true,
@@ -76,6 +79,19 @@ router.post('/constancy', async (req, res) => {
 
         await page.setContent(html, {
             waitUntil: 'networkidle0'
+        });
+
+        await page.waitForSelector('img');
+
+        await page.evaluate(async () => {
+            const images = Array.from(document.images);
+            await Promise.all(images.map(img => {
+                if (img.complete) return Promise.resolve();
+                return new Promise(resolve => {
+                    img.onload = resolve;
+                    img.onerror = resolve;
+                });
+            }));
         });
 
         const pdf = await page.pdf({
