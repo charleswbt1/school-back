@@ -10,7 +10,8 @@ class UserDto {
         phone,
         email,
         image,
-        state
+        state,
+        team_id
     }) {
         this.nick_name = nick_name;
         this.password = password;
@@ -23,6 +24,7 @@ class UserDto {
         this.email = email;
         this.image = image;
         this.state = state;
+        this.team_id = team_id;
     }
 }
 
