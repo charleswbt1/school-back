@@ -189,7 +189,7 @@ router.get('/data', async (req, res) => {
     }
 });
 router.post('/bill', async (req, res) => {
-    const { url, amount, student_id, year, month, type, source } = req.body;
+    const { url, amount, student_id, year, month, type, source, is_refund } = req.body;
     try {
         if (amount <= 0) {
             return res.status(400).json({ message: 'Monto no válido' });
@@ -198,9 +198,11 @@ router.post('/bill', async (req, res) => {
         if (!student) {
             return res.status(409).json({ message: 'No se encontró al estudiante' });
         }
+        const amountFinal = is_refund ? Number(amount) * -1 : Number(amount);
+
         student.payments.push({
             id: `PAY_${Date.now()}`,
-            amount,
+            amount: amountFinal,
             type,
             source: source,
             date: new Date(),
@@ -208,7 +210,7 @@ router.post('/bill', async (req, res) => {
             month: month,
             url
         });
-        student.cost_completed = parseFloat(student.cost_completed) + parseFloat(amount);
+        student.cost_completed = parseFloat(student.cost_completed) + parseFloat(amountFinal);
 
         if (student.state === 'pending') {
             const totalPaid = student.payments.filter(payment =>
