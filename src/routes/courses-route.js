@@ -112,46 +112,71 @@ router.patch('', async (req, res) => {
 
 router.get('/review', async (req, res) => {
     try {
-        const year = req.query.year;
-        const month = req.query.month;
+        const { year, month, team } = req.query;
+        const coordinators = await Repository.query('users', [
+            ['role', '==', 'coordinator'],
+            ['team_id', '==', team]
+        ]);
+        const review = await Promise.all(
+            coordinators.map(async coordinator => {
+                const courses = await Repository.query(repositoryName, [
+                    ['coordinator_id', '==', coordinator.id]
+                ]);
+                const students = await Repository.query('students', [
+                    ['coordinator_id', '==', coordinator.id]
+                ]);
+                const courseReview = courses.map(course => {
+                    let paymentStudents = 0;
+                    let titlePaymentStudents = 0;
+                    const courseStudents = students.filter(student => student.course_id === course.id);
+                    const amount = courseStudents.reduce((sum, student) => {
+                        const total = (student.payments || [])
+                            .filter(payment =>
+                                payment.year == year &&
+                                payment.month == month &&
+                                payment.type === 'cuota'
+                            )
+                            .reduce((s, payment) => s + (Number(payment.amount) || 0), 0);
+                        if (total > 0) {
+                            paymentStudents++;
+                        }
+                        return sum + total;
+                    }, 0);
 
-        const courses = await Repository.query(repositoryName);
-        const students = await Repository.query('students');
-        const coordinators = await Repository.query('users', [['role', '==', 'coordinator']]);
-
-        const review = coordinators.map(coordinator => {
-            const coordinatorCourses = courses.filter(course => course.coordinator_id === coordinator.id);
-
-            const courseReview = coordinatorCourses.map(course => {
-                let count = 0;
-                const courseStudents = students.filter(student => student.course_id === course.id);
-                const amount = courseStudents.reduce((sum, student) => {
-                    const payTotal = (student.payments || [])
-                        .filter(payment => payment.year === year && payment.month === month)
-                        .reduce((paymentSum, payment) => paymentSum + (Number(payment.amount) || 0), 0);
-                    if (payTotal > 0) {
-                        count++;
-                    }
-                    return sum + payTotal;
-                }, 0);
-
+                    const titleAmount = courseStudents.reduce((sum, student) => {
+                        const total = (student.payments || [])
+                            .filter(payment => payment.type === 'title')
+                            .reduce((s, payment) => s + (Number(payment.amount) || 0), 0);
+                        if (total > 0) {
+                            titlePaymentStudents++;
+                        }
+                        return sum + total;
+                    }, 0);
+                    return {
+                        course_name: course.name,
+                        students: courseStudents.length,
+                        paymentStudents,
+                        amount,
+                        titlePaymentStudents,
+                        titleAmount,
+                        year: course.year,
+                        month: course.month
+                    };
+                });
                 return {
-                    course_name: course.name,
-                    students: courseStudents.length,
-                    paymentStudents: count,
-                    amount: amount
+                    coordinator_name: `${coordinator.first_name} ${coordinator.last_name} ${coordinator.second_last_name}`,
+                    courses: courseReview.filter(
+                        course => course.amount > 0 || course.titleAmount > 0
+                    )
                 };
-            });
-
-            return {
-                coordinator_name: `${coordinator.first_name} ${coordinator.last_name} ${coordinator.second_last_name}`,
-                courses: courseReview.filter(review => review.amount > 0)
-            };
-        });
+            })
+        );
         res.status(200).json(review);
     } catch (error) {
         console.error(error);
-        res.status(412).json({ message: error.message });
+        res.status(412).json({
+            message: error.message
+        });
     }
 });
 router.get('/periods', async (req, res) => {
