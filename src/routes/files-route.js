@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const puppeteer = require("puppeteer-core");
-const chromium = require("@sparticuz/chromium");
+const puppeteer = require("puppeteer");
 const QRCode = require('qrcode');
 const { getBucket } = require('../config/firebase');
 const Repository = require('../repositories/repository');
@@ -74,12 +73,9 @@ router.post('/pdf', async (req, res) => {
             .replace('{{perfilImage}}', perfilImage);
 
         const browser = await puppeteer.launch({
-            executablePath: await chromium.executablePath(),
-            headless: chromium.headless,
-            args: chromium.args,
-            defaultViewport: chromium.defaultViewport,
-            ignoreHTTPSErrors: true
-        }); 
+            headless: 'new',
+            args: ['--no-sandbox']
+        });
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
         await page.waitForSelector('img');
