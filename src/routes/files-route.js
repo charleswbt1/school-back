@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const puppeteer = require('puppeteer');
+const QRCode = require('qrcode');
 const { getBucket } = require('../config/firebase');
 const Repository = require('../repositories/repository');
 const upload = multer({ storage: multer.memoryStorage() });
@@ -46,43 +47,35 @@ router.post(
         }
     }
 );
-router.post('/constancy', async (req, res) => {
+router.post('/pdf', async (req, res) => {
     try {
-        const { student_name, course_name, school_id } = req.body;
+        const { student_id, type } = req.body;
+        const student = await Repository.getById(student_id, 'students');
+        const user = await Repository.getById(student.user_id, 'users');
         const date = new Date();
         const dateText = date.toLocaleDateString('es-MX', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
+            day: 'numeric', month: 'long', year: 'numeric'
         });
 
-        let html = await fs.readFile(
-            path.join(__dirname, '../templates/constancy.html'),
-            'utf8'
-        );
-
-        const logo = 'file://' + path.join(__dirname, '../templates/logo.jpg');
-
-        html = html
-            .replace('{{name}}', student_name)
-            .replace('{{course}}', course_name)
-            .replace('{{schoolId}}', school_id)
+        const studentDocumentId = student.school_id.replace('-', '') || student_id.replace('STU_', '');
+        const logo = await fs.readFile(path.join(__dirname, `../templates/logo.jpg`));
+        const logoBase64 = `data:image/jpeg;base64,${logo.toString('base64')}`;
+        const qr = await QRCode.toDataURL(studentDocumentId);
+        const perfilImage = user.image || 'https://storage.googleapis.com/school-source/web/perfil.jpg'
+        const html = (await fs.readFile(path.join(__dirname, `../templates/${type}.html`), 'utf8'))
+            .replace('{{name}}', `${user.first_name} ${user.last_name} ${user.second_last_name}`)
+            .replace('{{course}}', student.course_name)
+            .replace('{{schoolId}}', studentDocumentId)
             .replace('{{date}}', dateText)
-            .replace('{{logo}}', logo);
+            .replace('{{logo}}', logoBase64)
+            .replace('{{curp}}', user.curp)
+            .replace('{{qr}}', qr)
+            .replace('{{perfilImage}}', perfilImage);
 
-        const browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox']
-        });
-
+        const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
         const page = await browser.newPage();
-
-        await page.setContent(html, {
-            waitUntil: 'networkidle0'
-        });
-
+        await page.setContent(html, { waitUntil: 'networkidle0' });
         await page.waitForSelector('img');
-
         await page.evaluate(async () => {
             const images = Array.from(document.images);
             await Promise.all(images.map(img => {
