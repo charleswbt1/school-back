@@ -81,7 +81,8 @@ router.get('/questions', async (req, res) => {
         res.status(200).json({
             id: id,
             name: entity.name,
-            questions: questions
+            questions: questions,
+            theme: entity.theme
         });
     } catch (error) {
         res.status(412).json({ message: error.message });
