@@ -11,7 +11,6 @@ function initializeFirebase() {
                 projectId: process.env.GOOGLE_CLOUD_PROJECT,
                 storageBucket: process.env.FIREBASE_STORAGE_BUCKET
             });
-            console.log('Firebase initialized successfully.');
         }
         db = admin.firestore();
         db.settings({

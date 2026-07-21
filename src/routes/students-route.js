@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Utils = require('../config/utils.js');
+const { getBucket } = require('../config/firebase');
 const Repository = require('../repositories/repository.js');
 const StudentDto = require('../dto/student-dto.js');
 
@@ -226,6 +227,25 @@ router.post('/bill', async (req, res) => {
         const updatedStudent = await Repository.update(student_id, student, repositoryName);
         res.status(200).json({
             message: "Registro de pago exitoso"
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+router.delete('/bill', async (req, res) => {
+    try {
+        const { student_id, payment_id } = req.body;
+        const student = await Repository.getById(student_id);
+        const payment = student.payments.find(payment => payment.id === payment_id);
+
+        const bucket = getBucket();
+        await bucket.file(payment.url).delete();
+
+        student.payments = student.payments.filter(payment => payment.id != payment_id);
+        await Repository.update(student_id, student, repositoryName)
+        res.status(200).json({
+            message: "Eliminacion de pago exitoso"
         });
     } catch (error) {
         console.error(error);
