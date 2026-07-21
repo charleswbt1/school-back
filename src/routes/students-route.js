@@ -236,11 +236,14 @@ router.post('/bill', async (req, res) => {
 router.delete('/bill', async (req, res) => {
     try {
         const { student_id, payment_id } = req.body;
-        const student = await Repository.getById(student_id);
+        const student = await Repository.getById(student_id, repositoryName);
         const payment = student.payments.find(payment => payment.id === payment_id);
 
         const bucket = getBucket();
-        await bucket.file(payment.url).delete();
+        const filePath = decodeURIComponent(
+            new URL(payment.url).pathname.replace(`/${bucket.name}/`, "")
+        );
+        await bucket.file(filePath).delete();
 
         student.payments = student.payments.filter(payment => payment.id != payment_id);
         await Repository.update(student_id, student, repositoryName)
@@ -269,6 +272,28 @@ router.post('/document', async (req, res) => {
             message: `Registro de documento ${type} exitoso`
         });
     } catch (error) {
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+router.delete('/document', async (req, res) => {
+    try {
+        const { student_id, type } = req.body;
+        const student = await Repository.getById(student_id, repositoryName);
+        const document = student.documents.find(document => document.type === type);
+
+        const bucket = getBucket();
+        const filePath = decodeURIComponent(
+            new URL(document.url).pathname.replace(`/${bucket.name}/`, "")
+        );
+        await bucket.file(filePath).delete();
+
+        student.documents = student.documents.filter(document => document.type != type);
+        await Repository.update(student_id, student, repositoryName)
+        res.status(200).json({
+            message: "Eliminacion de documento exitoso"
+        });
+    } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });
@@ -324,6 +349,7 @@ router.get('/control', async (req, res) => {
                 const user = await Repository.getById(entity.user_id, 'users');
                 return {
                     id: entity.id,
+                    user_id: user?.id,
                     curp: user?.curp,
                     name: user?.first_name + ' ' + user?.last_name + ' ' + user?.second_last_name,
                     phone: user?.phone,
