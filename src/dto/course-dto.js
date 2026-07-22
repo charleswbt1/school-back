@@ -28,7 +28,8 @@ class CourseDto {
         state,
         call_link,
         class_link,
-        hours_week
+        hours_week,
+        model
     }) {
         this.name = name;
         this.description = description;
@@ -59,6 +60,7 @@ class CourseDto {
         this.call_link = call_link;
         this.class_link = class_link;
         this.hours_week = hours_week;
+        this.model = model;
     }
 }
 

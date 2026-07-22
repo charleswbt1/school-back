@@ -365,6 +365,9 @@ router.get('/control', async (req, res) => {
             course_name: course.name,
             date_init: course.date_init,
             date_end: course.date_end,
+            model: course.model,
+            number_quota: course.number_quota,
+            content_id: course.content_id,
             students: students
         }
         res.status(200).json(response);

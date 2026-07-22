@@ -111,7 +111,7 @@ router.post('/evaluate', async (req, res) => {
         });
 
         const average = Number(((score / exam.questions.length) * 10).toFixed(1));
-        const approved = average >= exam.approve;
+        const approved = average >= 7;
         res.status(201).json({ score, average, approved });
     } catch (error) {
         res.status(409).json({ message: error.message });

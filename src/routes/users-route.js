@@ -99,21 +99,4 @@ router.post('/password', async (req, res) => {
     }
 });
 
-router.get('/fix', async (req, res) => {
-    try {
-        const users = await Repository.query('users');
-        for (const user of users) {
-            user.team_id = 'TEA_1784414333872';
-            await Repository.update(user.id, user, 'users');
-        }
-        res.json({
-            message: 'Usuarios actualizados correctamente',
-            total: users.length
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-});
-
 module.exports = router;
