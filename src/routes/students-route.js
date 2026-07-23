@@ -353,6 +353,7 @@ router.get('/control', async (req, res) => {
                     curp: user?.curp,
                     name: user?.first_name + ' ' + user?.last_name + ' ' + user?.second_last_name,
                     phone: user?.phone,
+                    nick_name: user?.nick_name,
                     state: entity?.state,
                     school_id: entity.school_id,
                     adviser_id: entity.adviser_id,
