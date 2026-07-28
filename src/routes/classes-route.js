@@ -21,6 +21,7 @@ router.get('', async (req, res) => {
         const id = req.query.id;
         const courseId = req.query.course_id;
         const moduleId = req.query.module_id;
+        const teacherId = req.query.teacher_id;
         var entities;
         if (id) {
             const entity = await Repository.getById(id, repositoryName);
@@ -32,6 +33,9 @@ router.get('', async (req, res) => {
             }
             if (moduleId) {
                 filters.push(['module_id', '==', moduleId]);
+            }
+            if (teacherId) {
+                filters.push(['teacher_id', '==', teacherId]);
             }
             entities = await Repository.query(repositoryName, filters);
         }

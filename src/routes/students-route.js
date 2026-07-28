@@ -36,7 +36,6 @@ router.post('', async (req, res) => {
                 course_name: course.name,
                 total_modules: content.modules?.length || 0,
                 total_cost: course.cost,
-                monthly_payment: course.monthly_payment,
                 modules_completed: 0,
                 cost_completed: 0,
                 average: 0,

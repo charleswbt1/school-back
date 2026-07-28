@@ -12,11 +12,13 @@ class ClassesDto {
         course_id,
         content_id,
         module_id,
+        teacher_id,
         medias = []
     }) {
         this.course_id = course_id;
         this.content_id = content_id;
         this.module_id = module_id;
+        this.teacher_id = teacher_id;
         this.medias = medias.map(
             media => new MediaDto(media)
         );

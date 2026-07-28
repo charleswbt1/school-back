@@ -1,9 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
+const csv = require("csv-parser");
+const { Readable } = require("stream");
 const Utils = require('../config/utils.js');
 const Repository = require('../repositories/repository.js');
 const UserDto = require('../dto/user-dto.js');
+const StudentDto = require('../dto/student-dto.js');
 
 const repositoryName = 'users';
 
@@ -98,5 +103,109 @@ router.post('/password', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+router.post("/import/students", upload.single("reqFile"), async (req, res) => {
+    try {
+        const rows = [];
+        const course = await Repository.getById(req.body.course_id, "courses");
+        const content = await Repository.getById(course.content_id, "contents");
+
+        Readable
+            .from(req.file.buffer)
+            .pipe(csv())
+            .on("data", row => rows.push(row))
+            .on("end", async () => {
+                let created = 0;
+                const errors = [];
+
+                for (const [index, row] of rows.entries()) {
+                    try {
+                        const exists = await Repository.query("usersTest", [["curp", "==", row.curp]]);
+                        if (exists.length) {
+                            errors.push({
+                                row: index + 2,
+                                error: "CURP ya registrada"
+                            });
+                            continue;
+                        }
+                        const nickName = generateNickName(row.firstName, row.lastName, row.secondLastName, row.curp);
+                        const user = await Repository.create(
+                            new UserDto({
+                                nick_name: nickName,
+                                password: await bcrypt.hash(nickName, 10),
+                                role: "student",
+                                first_name: row.firstName,
+                                last_name: row.lastName,
+                                second_last_name: row.secondLastName,
+                                curp: row.curp,
+                                phone: row.phone,
+                                email: row.email,
+                                image: "",
+                                state: "active",
+                                team_id: req.body.team_id
+                            }),
+                            "usersTest"
+                        );
+
+                        await Repository.create(
+                            new StudentDto({
+                                school_id: "",
+                                user_id: user.id,
+                                course_id: course.id,
+                                adviser_id: course.adviser_id,
+                                coordinator_id: course.coordinator_id,
+                                image: course.image,
+                                course_name: course.name,
+                                total_modules: content.modules.length,
+                                total_cost: course.cost,
+                                modules_completed: 0,
+                                cost_completed: 0,
+                                average: 0,
+                                payments: [],
+                                documents: [],
+                                notes: [],
+                                progresses: []
+                            }),
+                            "studentsTest"
+                        );
+                        created++;
+                    } catch (error) {
+                        console.error(error);
+                        errors.push({
+                            row: index + 2,
+                            error: error.message
+                        });
+                    }
+                }
+                res.json({
+                    total: rows.length,
+                    created,
+                    errors
+                });
+            });
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+});
+function generateNickName(firstName, lastName, secondLastName, curp) {
+    const names = firstName.trim().toLowerCase().split(/\s+/);
+    let nick = names[0];
+
+    if (names.length > 1) {
+        nick += names[1][0];
+    }
+
+    if (lastName) {
+        nick += lastName.trim()[0].toLowerCase();
+    }
+    if (secondLastName) {
+        nick += secondLastName.trim()[0].toLowerCase();
+    }
+    if (curp && curp.length >= 6) {
+        nick += curp.substring(4, 6);
+    }
+    return nick;
+}
 
 module.exports = router;
