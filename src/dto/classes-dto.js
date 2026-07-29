@@ -1,10 +1,12 @@
 class MediaDto {
     constructor({
         link,
-        date
+        date,
+        time
     }) {
         this.link = link;
         this.date = date;
+        this.time = time;
     }
 }
 class ClassesDto {
@@ -20,7 +22,10 @@ class ClassesDto {
         this.module_id = module_id;
         this.teacher_id = teacher_id;
         this.medias = medias.map(
-            media => new MediaDto(media)
+            media => {
+                media.time = new Date(`${media.date}T12:00:00`);
+                return new MediaDto(media);
+            }
         );
     }
 }

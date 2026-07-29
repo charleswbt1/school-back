@@ -324,8 +324,16 @@ router.post('/qualification', async (req, res) => {
             ? student.notes.reduce((sum, note) => sum + Number(note.value || 0), 0) / student.notes.length
             : 0;
         const updatedStudent = await Repository.update(student_id, student, repositoryName);
+
+        const course = await Repository.getById(student.course_id, 'courses');
+        const content = await Repository.getById(course.content_id, 'contents');
+        const approvedModules = student.notes.filter(
+            note => note.state === "aprobado"
+        ).length;
+
         res.status(200).json({
-            message: "Registro de calificación exitoso"
+            message: "Registro de calificación exitoso",
+            finished: content.modules.length === approvedModules
         });
     } catch (error) {
         console.error(error);
