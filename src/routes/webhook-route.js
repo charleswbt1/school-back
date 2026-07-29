@@ -34,9 +34,9 @@ router.post('/stripe', async (req, res) => {
 
                 if (student.state === 'pending') {
                     console.log(`webhook validate state ${payment.student_id}`);
-                    const totalPaid = student.payments.filter(payment =>
-                        payment.year === year && payment.month === month
-                    ).reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+                    const totalPaid = student.payments.filter(p =>
+                        p.year === payment.year && p.month === payment.month
+                    ).reduce((sum, p) => sum + Number(p.amount || 0), 0);
                     const course = await Repository.getById(student.course_id, 'courses');
                     const total = course.offer_cost_inscription + course.offer_cost_quota;
                     if (totalPaid >= total) {
