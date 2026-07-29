@@ -145,7 +145,7 @@ router.get('/review', async (req, res) => {
 
                     const titleAmount = courseStudents.reduce((sum, student) => {
                         const total = (student.payments || [])
-                            .filter(payment => payment.type === 'title')
+                            .filter(payment => payment.type === 'titulo')
                             .reduce((s, payment) => s + (Number(payment.amount) || 0), 0);
                         if (total > 0) {
                             titlePaymentStudents++;
