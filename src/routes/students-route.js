@@ -238,11 +238,13 @@ router.delete('/bill', async (req, res) => {
         const student = await Repository.getById(student_id, repositoryName);
         const payment = student.payments.find(payment => payment.id === payment_id);
 
-        const bucket = getBucket();
-        const filePath = decodeURIComponent(
-            new URL(payment.url).pathname.replace(`/${bucket.name}/`, "")
-        );
-        await bucket.file(filePath).delete();
+        if (payment.url && !payment.url.includes('stripe.jpg')) {
+            const bucket = getBucket();
+            const filePath = decodeURIComponent(
+                new URL(payment.url).pathname.replace(`/${bucket.name}/`, "")
+            );
+            await bucket.file(filePath).delete();
+        }
 
         student.payments = student.payments.filter(payment => payment.id != payment_id);
         await Repository.update(student_id, student, repositoryName)

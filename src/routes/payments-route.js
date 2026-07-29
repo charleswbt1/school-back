@@ -70,8 +70,8 @@ router.post('/checkout', async (req, res) => {
                     quantity: 1
                 }
             ],
-            success_url: 'http://localhost:3001/home/success.html',
-            cancel_url: 'http://localhost:3001/home/result.html?state=cancel'
+            success_url: `https://iuc-conecta.com/home/success.html?student_id=${student_id}`,
+            cancel_url: 'https://iuc-conecta.com/home/result.html?state=cancel'
         });
         const payment = await Repository.create({
             stripe_id: session.id,
