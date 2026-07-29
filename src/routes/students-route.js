@@ -48,6 +48,12 @@ router.post('', async (req, res) => {
             repositoryName,
             'pending'
         );
+        const user = await Repository.getById(user_id, 'users');
+        if (!user.team_id) {
+            const coordinator = await Repository.getById(course.coordinator_id, 'users');
+            user.team_id = coordinator.team_id;
+            await Repository.update(user_id, user, 'users');
+        }
         res.status(201).json({
             id: newStudent.id,
             user_id: newStudent.user_id
