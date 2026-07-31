@@ -29,8 +29,8 @@ router.post('/account', async (req, res) => {
         });
         const accountLink = await stripe.accountLinks.create({
             account: account.id,
-            refresh_url: "http://localhost:3001/home/success.html",
-            return_url: "http://localhost:3001/home/result.html",
+            refresh_url: "https://iuc-conecta.com/home/success.html",
+            return_url: "https://iuc-conecta.com/home/result.html",
             type: "account_onboarding"
         });
 
@@ -84,8 +84,21 @@ router.post('/checkout', async (req, res) => {
         }, 'payments');
         res.json({ url: session.url });
     } catch (error) {
+        console.log(error);
+        console.log(JSON.stringify(error));
         res.status(500).json(error);
     }
+});
+
+router.get('/info', async (req, res) => {
+    const account = await stripe.accounts.retrieve("acct_1TyxJ875gm7xWle1");
+
+    console.log(account.capabilities);
+    console.log(account.charges_enabled);
+    console.log(account.payouts_enabled);
+    console.log(account.details_submitted);
+    console.log(account.controller);
+    res.json(account);
 });
 
 module.exports = router;
