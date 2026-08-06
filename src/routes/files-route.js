@@ -57,20 +57,44 @@ router.post('/pdf', async (req, res) => {
             day: 'numeric', month: 'long', year: 'numeric'
         });
 
-        const studentDocumentId = student.school_id.replace('-', '') || student_id.replace('STU_', '');
-        const logo = await fs.readFile(path.join(__dirname, `../templates/logo.jpg`));
-        const logoBase64 = `data:image/jpeg;base64,${logo.toString('base64')}`;
-        const qr = await QRCode.toDataURL(studentDocumentId);
-        const perfilImage = user.image || 'https://storage.googleapis.com/school-source/web/perfil.jpg'
-        const html = (await fs.readFile(path.join(__dirname, `../templates/${type}.html`), 'utf8'))
-            .replace('{{name}}', `${user.first_name} ${user.last_name} ${user.second_last_name}`)
-            .replace('{{course}}', student.course_name)
-            .replace('{{schoolId}}', studentDocumentId)
+        const studentId = student.school_id.replace('-', '') || student_id.replace('STU_', '');
+        const curp = user.curp || 'N/A';
+        const studentName = `${user.first_name} ${user.last_name} ${user.second_last_name}`;
+        const courseName = student.course_name;
+
+        let html = (await fs.readFile(path.join(__dirname, `../templates/${type}.html`), 'utf8'))
+            .replace('{{name}}', studentName)
+            .replaceAll('{{course}}', courseName)
+            .replace('{{schoolId}}', studentId)
             .replace('{{date}}', dateText)
-            .replace('{{logo}}', logoBase64)
-            .replace('{{curp}}', user.curp)
-            .replace('{{qr}}', qr)
-            .replace('{{perfilImage}}', perfilImage);
+            .replace('{{curp}}', curp);
+        if (type === 'credential') {
+            const logo = await fs.readFile(path.join(__dirname, `../templates/logo.jpg`));
+            const logoBase64 = `data:image/jpeg;base64,${logo.toString('base64')}`;
+            const contentQr = `${studentId}\n${curp}\n${studentName}\n${courseName}`;
+            const qr = await QRCode.toDataURL(contentQr);
+            const perfilImage = user.image || 'https://storage.googleapis.com/school-source/web/perfil.jpg'
+            html = html.replace('{{logo}}', logoBase64)
+                .replace('{{qr}}', qr)
+                .replace('{{perfilImage}}', perfilImage);
+        }
+        if (type === 'constancy') {
+            const header = await fs.readFile(path.join(__dirname, `../templates/header.png`));
+            const headerBase64 = `data:image/png;base64,${header.toString('base64')}`;
+            const water = await fs.readFile(path.join(__dirname, `../templates/water.png`));
+            const waterBase64 = `data:image/png;base64,${water.toString('base64')}`;
+            const signature = await fs.readFile(path.join(__dirname, `../templates/signature.png`));
+            const signatureBase64 = `data:image/png;base64,${signature.toString('base64')}`;
+            const course = await Repository.getById(student.course_id, 'courses');
+            html = html.replace('{{header}}', headerBase64)
+                .replace('{{watermark}}', waterBase64)
+                .replace('{{signature}}', signatureBase64)
+                .replace('{{rvoe}}', course.rvoe)
+                .replace('{{months}}', course.number_quota)
+                .replace('{{date_init}}', course.date_init)
+                .replace('{{date_end}}', course.date_end);
+
+        }
 
         const browser = await puppeteer.launch({
             headless: 'new',
@@ -92,13 +116,6 @@ router.post('/pdf', async (req, res) => {
 
         const pdf = await page.pdf({
             format: 'A4',
-            printBackground: true,
-            margin: {
-                top: '10mm',
-                right: '10mm',
-                bottom: '10mm',
-                left: '10mm'
-            }
         });
         await browser.close();
 

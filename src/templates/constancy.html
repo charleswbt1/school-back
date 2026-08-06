@@ -2,8 +2,9 @@
 <html lang="es">
 
 <head>
+
     <meta charset="UTF-8">
-    <title>Constancia de Estudios</title>
+
     <style>
         * {
             margin: 0;
@@ -13,256 +14,208 @@
 
         body {
 
-            background: #efefef;
-
-            font-family: Arial, Helvetica, sans-serif;
-
-            display: flex;
-
-            justify-content: center;
-
-            padding: 40px;
+            font-family: "Times New Roman", serif;
+            background: #e9e9e9;
 
         }
 
-        .documento {
+        .document {
 
-            width: 850px;
+            width: 816px;
+            height: 1056px;
+
+            margin: auto;
 
             background: white;
 
-            padding: 60px;
+            position: relative;
 
-            color: #000;
-
-            box-shadow: 0 0 15px rgba(0, 0, 0, .15);
+            overflow: hidden;
 
         }
+
+        /*=============================
+MARCA DE AGUA
+=============================*/
+
+        .watermark {
+
+            position: absolute;
+
+            width: 750px;
+
+            left: 50%;
+
+            top: 63%;
+
+            transform: translate(-50%, -45%);
+
+            opacity: .15;
+
+            z-index: 0;
+
+        }
+
+        /*=============================
+ENCABEZADO
+=============================*/
 
         .header {
 
-            display: flex;
-
-            justify-content: space-between;
-
-            align-items: flex-start;
-            ;
-
-            border-bottom: 3px solid #173b73;
-
-            padding-bottom: 20px;
-
-            margin-bottom: 45px;
-
             position: relative;
-        }
 
-        .header-left {
-
-            display: flex;
-
-            align-items: flex-start;
-            ;
+            z-index: 2;
 
         }
 
         .logo {
-
-            width: 95px;
-
-            height: auto;
-
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
         }
 
-        .school-info {
-
-            position: absolute;
-
-            left: 50%;
-
-            transform: translateX(-50%);
+        .school {
 
             text-align: center;
 
         }
 
-        .school-info h2 {
+        .text-right {
 
-            margin: 0;
-
-            font-size: 18px;
-
-            color: #173b73;
-
-            letter-spacing: 3px;
-
-        }
-
-        .school-info h1 {
-
-            margin: 0;
-
-            font-size: 30px;
-
-            color: #173b73;
-
-            font-weight: bold;
-
-        }
-
-        .school-info p {
-
-            margin-top: 5px;
-
-            color: #666;
+            position: relative;
 
             font-size: 14px;
 
-        }
-
-        .header-right {
-
             text-align: right;
 
-            font-size: 15px;
-
-            color: #173b73;
-
-            line-height: 1.7;
+            margin-right: 30px;
 
         }
 
-        h1 {
+        /*==============TITULO=====================*/
+
+        .title {
+
+            margin-top: 70px;
 
             text-align: center;
 
-            font-size: 30px;
+            font-size: 28px;
 
-            color: #173b73;
+            font-weight: bold;
 
             letter-spacing: 2px;
 
-            margin: 50px 0;
-
-            font-weight: 700;
-
-
         }
 
-        .saludo {
+        /*=============CONTENIDO================*/
 
-            font-size: 20px;
+        .content {
+            position: relative;
+            z-index: 2;
+            margin-top: 60px;
+            margin-left: 40px;
+            margin-right: 40px;
+        }
+
+        .intro {
+
+            font-size: 18px;
 
             margin-bottom: 30px;
 
         }
 
-        .contenido {
-
-            font-size: 20px;
-
+        .paragraph {
+            font-size: 18px;
+            line-height: 1.4;
             text-align: justify;
-
-            line-height: 1.8;
-
-            margin-bottom: 25px;
-
+            margin-bottom: 17px;
+            text-indent: 20px;
         }
 
-        span {
-
-            color: #0038ff;
-
-        }
-
-        .firma {
-
-            margin-top: 80px;
-
+        .student {
             text-align: center;
+            font-size: 26px;
+            font-weight: bold;
+            margin: 25px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-            font-size: 20px;
-
+        /*=========FIRMA===========*/
+        .stamp {
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 350px;
         }
     </style>
+
 </head>
 
 <body>
 
-    <div class="documento">
+    <div class="document">
+        <!-- Marca de agua -->
+        <img src="{{watermark}}" class="watermark">
 
-        <header class="header">
+        <div class="header">
+            <img src="{{header}}" class="logo">
+        </div>
+        <br><br><br><br><br><br><br><br><br><br><br>
+        <div class="text-right">
+            <p>{{course}}</p>
+        </div>
 
-            <div class="header-left">
+        <div class="title">
+            CONSTANCIA DE ESTUDIOS
+        </div>
 
-                <img src="{{logo}}" alt="Instituto Universitario Conecta" class="logo">
-
-                <div class="school-info">
-
-                    <h2>INSTITUTO UNIVERSITARIO</h2>
-
-                    <h1>CONECTA</h1>
-
-                    <p>Educación para Transformar</p>
-
-                </div>
-
+        <div class="content">
+            <div class="intro">
+                A QUIEN CORRESPONDA:
             </div>
-
-            <div class="header-right">
-
-                <p>Actopan, Hidalgo</p>
-
-                <p>17 de julio de 2026</p>
-
+            <p class="paragraph">
+                El que suscribe Oficina de control escolar del
+                <strong>Instituto Conecta Universidades CONAPEM</strong>,
+                en convenio interno con el Centro Educativo Universitario SIGLO XXI,
+                con número de RVOE para la
+                <strong>{{course}}</strong>: {{rvoe}}
+            </p>
+            <br><br>
+            <p class="school">
+                Por medio de la presente HACE CONSTAR que, el (la) alumno (a):
+            </p>
+            <div class="student">
+                {{name}}
             </div>
+            <p class="paragraph">
+                Con número de matrícula
+                <strong>{{schoolId}}</strong>,
+                se encuentra inscrito(a) como estudiante regular en el programa educativo
+                <strong>{{course}}</strong> con duración de {{months}} meses,
+                que comprende el periodo de {{date_init}} - {{date_end}}.
+            </p>
 
-        </header>
-
-        <h1>CONSTANCIA DE ESTUDIOS</h1>
-
-
-        <p class="saludo">
-            A quién corresponda:
-        </p>
-
-
-        <p class="contenido">
-
-            Por medio de la presente,
-
-            hago constar que:
-
-            <span>{{name}}</span>,
-
-            es estudiante regular de nuestra institución.
-
-            Este se encuentra cursando
-
-            <span>{{course}}</span>
-
-            con matrícula
-
-            <span>{{schoolId}}</span>.
-
-        </p>
-
-        <p class="contenido">
-
-            La presente se entrega a petición de la parte interesada para los fines que le convengan.
-
-        </p>
-
-        <br><br><br><br>
-
-        <div class="firma" hidden>
-
-            ________________________________
-
+            <p class="paragraph">
+                Se extiende la presente constancia a petición del (la) interesado (a),
+                para los fines que más le convengan, en el municipio de Actopan,
+                Hidalgo a {{date}}.
+            </p>
             <br>
-
-            Director(a) Académico(a)
-
+            <img src="{{signature}}" class="stamp">
+            <p class="school">
+                Oficina de Control Escolar
+                <br>Instituto Universitario Conecta &
+                <br>Colegio Nacional de Peritos en Enfermería de México.
+            </p>
+            <br>
+            <p>
+                Calle, la Paz #8, Col. Obrera, Actopan, Hidalgo.
+                <br>C.P. 42500
+            </p>
         </div>
 
     </div>
