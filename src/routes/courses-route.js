@@ -102,6 +102,8 @@ router.get('', async (req, res) => {
 router.patch('', async (req, res) => {
     try {
         const id = req.query.id;
+        const squad = await Repository.getById(req.body.squad_id, 'squads');
+        req.body.image = squad.logo;
         const entity = await Repository.update(id, req.body, repositoryName);
         res.status(200).json(Utils.formatDates(entity));
     } catch (error) {
