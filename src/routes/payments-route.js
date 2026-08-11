@@ -47,7 +47,11 @@ router.post('/checkout', async (req, res) => {
         const student = await Repository.getById(student_id, 'students');
         const user = await Repository.getById(student.user_id, 'users');
         const team = await Repository.getById(user.team_id, 'teams');
-        const applicationFee = amount * 1;
+
+        const amountInCents = Math.round(Number(amount) * 100);
+        const platformFeePercentage = 0.04;
+        const applicationFee = Math.round(amountInCents * platformFeePercentage) + 400;
+
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             mode: 'payment',
@@ -65,7 +69,7 @@ router.post('/checkout', async (req, res) => {
                             name: 'IUC Conecta',
                             description: type
                         },
-                        unit_amount: amount * 100
+                        unit_amount: amountInCents
                     },
                     quantity: 1
                 }
@@ -77,15 +81,14 @@ router.post('/checkout', async (req, res) => {
             stripe_id: session.id,
             stripe_data: session,
             student_id: student_id,
-            amount: amount,
+            amount: Number(amount),
             year: year,
             month: month,
             type: type
         }, 'payments');
         res.json({ url: session.url });
     } catch (error) {
-        console.log(error);
-        console.log(JSON.stringify(error));
+        console.error('Stripe checkout error:', error);
         res.status(500).json(error);
     }
 });
