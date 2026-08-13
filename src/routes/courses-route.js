@@ -201,6 +201,7 @@ router.get('/student', async (req, res) => {
         const student = await Repository.getById(studentId, 'students');
         const course = await Repository.getById(student.course_id, 'courses');
         const content = await Repository.getById(course.content_id, 'contents');
+        const user = await Repository.getById(student.user_id, 'users');
 
         const payTotal = student.payments.reduce((total, payment) => total += Number(payment.amount), 0);
         const availableModules = Math.max(0, Math.floor((payTotal - 500) / 500));
@@ -209,7 +210,10 @@ router.get('/student', async (req, res) => {
         res.status(200).json({
             student: student,
             course: course,
-            content: content
+            content: content,
+            name: `${user.first_name} ${user.last_name} ${user.second_last_name}`,
+            email: user.email,
+            phone: user.phone
         });
     } catch (error) {
         console.error(error);
