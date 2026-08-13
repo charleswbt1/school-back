@@ -120,6 +120,14 @@ router.post("/import/students", upload.single("reqFile"), async (req, res) => {
                 for (const [index, row] of rows.entries()) {
                     try {
                         const nickName = generateNickName(row.firstName, row.lastName, row.secondLastName, row.curp);
+                        const exists = await Repository.query("users", [["nick_name", "==", nickName]]);
+                        if (exists.length) {
+                            errors.push({
+                                row: index + 2,
+                                error: "nickName ya registrado"
+                            });
+                            continue;
+                        }
                         const user = await Repository.create(
                             new UserDto({
                                 nick_name: nickName,
