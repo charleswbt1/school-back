@@ -119,14 +119,6 @@ router.post("/import/students", upload.single("reqFile"), async (req, res) => {
 
                 for (const [index, row] of rows.entries()) {
                     try {
-                        const exists = await Repository.query("usersTest", [["curp", "==", row.curp]]);
-                        if (exists.length) {
-                            errors.push({
-                                row: index + 2,
-                                error: "CURP ya registrada"
-                            });
-                            continue;
-                        }
                         const nickName = generateNickName(row.firstName, row.lastName, row.secondLastName, row.curp);
                         const user = await Repository.create(
                             new UserDto({
@@ -143,7 +135,7 @@ router.post("/import/students", upload.single("reqFile"), async (req, res) => {
                                 state: "active",
                                 team_id: req.body.team_id
                             }),
-                            "usersTest"
+                            "users"
                         );
 
                         await Repository.create(
@@ -165,7 +157,7 @@ router.post("/import/students", upload.single("reqFile"), async (req, res) => {
                                 notes: [],
                                 progresses: []
                             }),
-                            "studentsTest"
+                            "students"
                         );
                         created++;
                     } catch (error) {
