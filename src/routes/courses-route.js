@@ -65,6 +65,7 @@ router.get('', async (req, res) => {
         const coordinatorId = req.query.coordinator_id;
         const teacherId = req.query.teacher_id;
         const available = req.query.available;
+        const teamId = req.query.team_id;
 
         var entities;
         if (id) {
@@ -92,6 +93,16 @@ router.get('', async (req, res) => {
                 filters.push(['date_init', '>=', today]);
             }
             entities = await Repository.query(repositoryName, filters);
+
+            if (teamId) {
+                const coordinators = await Repository.query('users', [
+                    ['role', '==', 'coordinator'],
+                    ['team_id', '==', teamId]
+                ]);
+                entities = entities.filter(course =>
+                    coordinators.some(coordinator => coordinator.id === course.coordinator_id)
+                );
+            }
         }
         res.status(200).json(entities.map(Utils.formatDates));
     } catch (error) {
