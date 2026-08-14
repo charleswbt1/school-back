@@ -41,15 +41,17 @@ class Note {
         this.attempts = attempts;
     }
 }
-class Progress {
+class JobDto {
     constructor({
-        topic_id,
-        value,
-        state
+        id,
+        link,
+        score,
+        date
     }) {
-        this.topic_id = topic_id;
-        this.value = value;
-        this.state = state;
+        this.id = id;
+        this.link = link;
+        this.score = score;
+        this.date = date;
     }
 }
 
@@ -71,7 +73,7 @@ class StudentDto {
         payments,
         documents,
         notes,
-        progresses
+        jobs
     }) {
         this.school_id = school_id;
         this.user_id = user_id;
@@ -95,8 +97,8 @@ class StudentDto {
         this.notes = notes.map(
             note => new Note(note)
         );
-        this.progresses = progresses.map(
-            progress => new Progress(progress)
+        this.jobs = jobs.map(
+            job => new JobDto(job)
         );
     }
 }

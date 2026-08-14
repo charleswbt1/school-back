@@ -42,7 +42,7 @@ router.post('', async (req, res) => {
                 payments: [],
                 documents: [],
                 notes: [],
-                progresses: [],
+                jobs: [],
                 state: 'pending'
             }),
             repositoryName,
@@ -263,16 +263,26 @@ router.delete('/bill', async (req, res) => {
     }
 });
 router.post('/document', async (req, res) => {
-    const { url, type, student_id } = req.body;
+    const { url, type, student_id, job_id, job_score } = req.body;
     try {
         const student = await Repository.getById(student_id, repositoryName);
         if (!student) {
             return res.status(409).json({ message: 'No se encontró al estudiante' });
         }
-        student.documents.push({
-            type,
-            url
-        });
+
+        if (type === 'job') {
+            student.jobs.push({
+                link: url,
+                date: new Date(),
+                id: job_id,
+                score: job_score
+            });
+        } else {
+            student.documents.push({
+                type,
+                url
+            });
+        }
 
         const updatedStudent = await Repository.update(student_id, student, repositoryName);
         res.status(200).json({
@@ -284,17 +294,24 @@ router.post('/document', async (req, res) => {
 });
 router.delete('/document', async (req, res) => {
     try {
-        const { student_id, type } = req.body;
+        const { student_id, type, job_id } = req.body;
         const student = await Repository.getById(student_id, repositoryName);
-        const document = student.documents.find(document => document.type === type);
+        const url = job_id
+            ? student.jobs.find(job => job.id === job_id)?.link
+            : student.documents.find(document => document.type === type)?.url;
 
         const bucket = getBucket();
         const filePath = decodeURIComponent(
-            new URL(document.url).pathname.replace(`/${bucket.name}/`, "")
+            new URL(url).pathname.replace(`/${bucket.name}/`, "")
         );
         await bucket.file(filePath).delete();
 
-        student.documents = student.documents.filter(document => document.type != type);
+        if (job_id) {
+            student.jobs = student.jobs.filter(job => job.id != job_id);
+        } else {
+            student.documents = student.documents.filter(document => document.type != type);
+        }
+
         await Repository.update(student_id, student, repositoryName)
         res.status(200).json({
             message: "Eliminacion de documento exitoso"

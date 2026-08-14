@@ -65,7 +65,7 @@ router.get('', async (req, res) => {
         const coordinatorId = req.query.coordinator_id;
         const teacherId = req.query.teacher_id;
         const available = req.query.available;
-        const teamId = req.query.team_id;
+        const adviserId = req.query.adviser_id;
 
         var entities;
         if (id) {
@@ -73,35 +73,36 @@ router.get('', async (req, res) => {
             entities = entity ? [entity] : [];
         } else {
             const filters = [];
-            if (state) {
-                filters.push(['state', '==', state]);
-            }
-            if (coordinatorId) {
-                filters.push(['coordinator_id', '==', coordinatorId]);
-            }
-            if (year && month) {
-                filters.push(['year', '==', year]);
-                filters.push(['month', '==', month]);
-            }
-            if (teacherId) {
-                filters.push(['teacher_id', '==', teacherId]);
-                filters.push(['state', '==', 'active']);
-            }
             if (available) {
                 const today = new Date().toISOString().split('T')[0];
                 filters.push(['state', '==', 'active']);
                 filters.push(['date_init', '>=', today]);
-            }
-            entities = await Repository.query(repositoryName, filters);
-
-            if (teamId) {
-                const coordinators = await Repository.query('users', [
-                    ['role', '==', 'coordinator'],
-                    ['team_id', '==', teamId]
-                ]);
-                entities = entities.filter(course =>
-                    coordinators.some(coordinator => coordinator.id === course.coordinator_id)
-                );
+                entities = await Repository.query(repositoryName, filters);
+                if (coordinatorId) {
+                    entities = entities.filter(entity => entity.coordinator_id === coordinatorId);
+                }
+                if (adviserId) {
+                    entities = entities.filter(entity => entity.adviser_id === adviserId);
+                }
+            } else {
+                if (state) {
+                    filters.push(['state', '==', state]);
+                }
+                if (coordinatorId) {
+                    filters.push(['coordinator_id', '==', coordinatorId]);
+                }
+                if (adviserId) {
+                    filters.push(['adviser_id', '==', adviserId]);
+                }
+                if (year && month) {
+                    filters.push(['year', '==', year]);
+                    filters.push(['month', '==', month]);
+                }
+                if (teacherId) {
+                    filters.push(['teacher_id', '==', teacherId]);
+                    filters.push(['state', '==', 'active']);
+                }
+                entities = await Repository.query(repositoryName, filters);
             }
         }
         res.status(200).json(entities.map(Utils.formatDates));

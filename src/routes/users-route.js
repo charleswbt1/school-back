@@ -163,7 +163,7 @@ router.post("/import/students", upload.single("reqFile"), async (req, res) => {
                                 payments: [],
                                 documents: [],
                                 notes: [],
-                                progresses: []
+                                jobs: []
                             }),
                             "students"
                         );

@@ -9,13 +9,24 @@ class MediaDto {
         this.time = time;
     }
 }
+class JobClassDto {
+    constructor({
+        id,
+        link
+    }) {
+        this.id = id || `JOB_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+        this.link = link;
+    }
+}
+
 class ClassesDto {
     constructor({
         course_id,
         content_id,
         module_id,
         teacher_id,
-        medias = []
+        medias = [],
+        jobs = []
     }) {
         this.course_id = course_id;
         this.content_id = content_id;
@@ -27,6 +38,7 @@ class ClassesDto {
                 return new MediaDto(media);
             }
         );
+        this.jobs = jobs.map(job => new JobClassDto(job));
     }
 }
 
