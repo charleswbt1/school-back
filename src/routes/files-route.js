@@ -47,6 +47,19 @@ router.post(
         }
     }
 );
+router.delete('/', async (req, res) => {
+    try {
+        const { url } = req.body;
+        const bucket = getBucket();
+        const filePath = decodeURIComponent(
+            new URL(url).pathname.replace(`/${bucket.name}/`, "")
+        );
+        await bucket.file(filePath).delete();
+        res.status(200).json({ message: "Archivo eliminado correctamente" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 router.post('/pdf', async (req, res) => {
     try {
         const { student_id, type } = req.body;
