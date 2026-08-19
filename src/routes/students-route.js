@@ -271,11 +271,14 @@ router.post('/document', async (req, res) => {
         }
 
         if (type === 'job') {
+            if (!student.jobs) {
+                student.jobs = [];
+            }
             student.jobs.push({
                 link: url,
                 date: new Date(),
                 id: job_id,
-                score: job_score
+                score: job_score || 0
             });
         } else {
             student.documents.push({
@@ -289,6 +292,7 @@ router.post('/document', async (req, res) => {
             message: `Registro de documento ${type} exitoso`
         });
     } catch (error) {
+        console.error(`students document request ${JSON.stringify(req.body)} error: ${error}`);
         res.status(500).json({ message: 'Internal server error' });
     }
 });

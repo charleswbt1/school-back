@@ -48,7 +48,7 @@ router.get('', async (req, res) => {
 router.patch('', async (req, res) => {
     try {
         const id = req.query.id;
-        const entity = await Repository.update(id, req.body, repositoryName);
+        const entity = await Repository.update(id, new ClassesDto(req.body), repositoryName);
         res.status(200).json(Utils.formatDates(entity));
     } catch (error) {
         console.error(error);
