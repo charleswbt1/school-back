@@ -369,6 +369,27 @@ router.post('/qualification', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+router.post('/job-qualification', async (req, res) => {
+    const { student_id, job_id, qualification } = req.body;
+    try {
+        if (qualification < 0 || qualification > 10) {
+            return res.status(400).json({ message: 'Calificación no válida' });
+        }
+        const student = await Repository.getById(student_id, repositoryName);
+        if (!student) {
+            return res.status(409).json({ message: 'No se encontró al estudiante' });
+        }
+        student.jobs.find(job => job.id === job_id).score = qualification;
+        const updatedStudent = await Repository.update(student_id, student, repositoryName);
+
+        res.status(200).json({
+            message: "Registro de calificación exitoso"
+        });
+    } catch (error) {
+        console.error(`student job-qualification ${JSON.stringify(req.body)} ${error}`);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
 router.get('/control', async (req, res) => {
     try {
         const courseId = req.query.course_id;
