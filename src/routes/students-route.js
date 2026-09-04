@@ -83,7 +83,7 @@ router.get('', async (req, res) => {
             }
             entities = await Repository.query(repositoryName, filters);
         }
-        res.status(200).json(entities.map(Utils.formatDates));
+        res.status(200).json(entities.map(entity => Repository.formatDates(entity)));
     } catch (error) {
         console.error(error);
         res.status(412).json({ message: error.message });

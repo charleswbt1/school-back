@@ -154,6 +154,35 @@ class Repository {
 
         return obj;
     }
+
+    formatDates(data) {
+        if (data === null || data === undefined) {
+            return data;
+        }
+
+        if (data instanceof Date) {
+            return data.toISOString();
+        }
+
+        if (typeof data.toDate === 'function') {
+            return data.toDate().toISOString();
+        }
+
+        if (Array.isArray(data)) {
+            return data.map(item => this.formatDates(item));
+        }
+
+        if (typeof data === 'object') {
+            return Object.fromEntries(
+                Object.entries(data).map(([key, value]) => [
+                    key,
+                    this.formatDates(value)
+                ])
+            );
+        }
+
+        return data;
+    }
 }
 
 module.exports = new Repository();
