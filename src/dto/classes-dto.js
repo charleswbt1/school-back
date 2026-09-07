@@ -9,14 +9,29 @@ class MediaDto {
         this.time = time;
     }
 }
+class MaterialDto {
+    constructor({
+        id,
+        link,
+        name,
+        description
+    }) {
+        this.id = id || `MAT_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+        this.link = link;
+        this.name = name;
+        this.description = description;
+    }
+}
 class JobClassDto {
     constructor({
         id,
         link,
+        name,
         description
     }) {
         this.id = id || `JOB_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
         this.link = link;
+        this.name = name;
         this.description = description;
     }
 }
@@ -28,6 +43,7 @@ class ClassesDto {
         module_id,
         teacher_id,
         medias = [],
+        materials = [],
         jobs = []
     }) {
         this.course_id = course_id;
@@ -40,6 +56,7 @@ class ClassesDto {
                 return new MediaDto(media);
             }
         );
+        this.materials = materials.map(material => new MaterialDto(material));
         this.jobs = jobs.map(job => new JobClassDto(job));
     }
 }
