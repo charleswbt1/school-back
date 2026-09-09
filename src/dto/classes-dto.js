@@ -27,12 +27,14 @@ class JobClassDto {
         id,
         link,
         name,
-        description
+        description,
+        delivery_date,
     }) {
         this.id = id || `JOB_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
         this.link = link;
         this.name = name;
         this.description = description;
+        this.delivery_date = delivery_date;
     }
 }
 
