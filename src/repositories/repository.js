@@ -183,6 +183,20 @@ class Repository {
 
         return data;
     }
+
+    saveUserTrack(userTrackDto) {
+        try {
+            const ref = this.getCollection('user_tracks').doc();
+            const data = {
+                ...userTrackDto,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            };
+            return ref.set(data);
+        } catch (error) {
+            console.error('Error saving user track:', error);
+        }
+    }
 }
 
 module.exports = new Repository();

@@ -274,12 +274,18 @@ router.post('/document', async (req, res) => {
             if (!student.jobs) {
                 student.jobs = [];
             }
-            student.jobs.push({
-                link: url,
-                date: new Date(),
-                id: job_id,
-                score: job_score || 0
-            });
+            const job = student.jobs.find(job => job.id === job_id);
+            if (job) {
+                job.link = url;
+                job.date = new Date();
+            } else {
+                student.jobs.push({
+                    link: url,
+                    date: new Date(),
+                    id: job_id,
+                    score: job_score || 0
+                });
+            }
         } else {
             student.documents.push({
                 type,
@@ -287,7 +293,7 @@ router.post('/document', async (req, res) => {
             });
         }
 
-        const updatedStudent = await Repository.update(student_id, student, repositoryName);
+        await Repository.update(student_id, student, repositoryName);
         res.status(200).json({
             message: `Registro de documento ${type} exitoso`
         });
@@ -303,6 +309,9 @@ router.delete('/document', async (req, res) => {
         const url = job_id
             ? student.jobs.find(job => job.id === job_id)?.link
             : student.documents.find(document => document.type === type)?.url;
+        if (!url) {
+            return res.status(201).json({ message: 'Documento no encontrado' });
+        }
 
         const bucket = getBucket();
         const filePath = decodeURIComponent(
@@ -317,9 +326,7 @@ router.delete('/document', async (req, res) => {
         }
 
         await Repository.update(student_id, student, repositoryName)
-        res.status(200).json({
-            message: "Eliminacion de documento exitoso"
-        });
+        res.status(200).json({ message: "Eliminacion de documento exitoso" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
@@ -379,9 +386,22 @@ router.post('/job-qualification', async (req, res) => {
         if (!student) {
             return res.status(409).json({ message: 'No se encontró al estudiante' });
         }
-        student.jobs.find(job => job.id === job_id).score = qualification;
-        const updatedStudent = await Repository.update(student_id, student, repositoryName);
+        if (!student.jobs) {
+            student.jobs = [];
+        }
+        const job = student.jobs.find(job => job.id === job_id);
+        if (job) {
+            job.score = Number(qualification);
+        } else {
+            student.jobs.push({
+                link: null,
+                date: new Date(),
+                id: job_id,
+                score: Number(qualification)
+            });
+        }
 
+        await Repository.update(student_id, student, repositoryName);
         res.status(200).json({
             message: "Registro de calificación exitoso"
         });
