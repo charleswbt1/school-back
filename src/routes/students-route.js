@@ -99,6 +99,25 @@ router.patch('', async (req, res) => {
         res.status(412).json({ message: error.message });
     }
 });
+router.delete('', async (req, res) => {
+    try {
+        const id = req.query.id;
+        const entity = await Repository.getById(id, repositoryName);
+        if (!entity) {
+            return res.status(404).json({ message: 'Estudiante no encontrado' });
+        }
+        entity.documents.forEach(async document => {
+            if (document.url && !document.url.includes('stripe.jpg')) {
+                await deleteFile(document.url);
+            }
+        });
+        await Repository.delete(id, repositoryName);
+        res.status(200).json({ message: 'Estudiante eliminado exitosamente' });
+    } catch (error) {
+        console.error(error);
+        res.status(412).json({ message: error.message });
+    }
+});
 
 router.get('/courses', async (req, res) => {
     try {
@@ -454,5 +473,17 @@ router.get('/control', async (req, res) => {
         res.status(412).json({ message: error.message });
     }
 });
+
+async function deleteFile(fileUrl) {
+    try {
+        const bucket = getBucket();
+        const filePath = decodeURIComponent(
+            new URL(fileUrl).pathname.replace(`/${bucket.name}/`, "")
+        );
+        await bucket.file(filePath).delete();
+    } catch (error) {
+        console.error(`Error deleting file ${fileUrl}:`, error);
+    }
+}
 
 module.exports = router;

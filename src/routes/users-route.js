@@ -21,6 +21,13 @@ router.post('', async (req, res) => {
         if (!nickName.valid) {
             throw new Error(nickName.message);
         }
+        const curp = await Repository.query('users', [
+            ['curp', '==', request.curp],
+            ['role', '==', request.role]
+        ]);
+        if (curp.length > 0) {
+            throw new Error(`El CURP ${request.curp} ya está registrado para el rol ${request.role} nick_name ${curp[0].nick_name}`);
+        }
 
         const entity = await Repository.create(request, repositoryName);
         res.status(201).json(Utils.formatDates(entity));
