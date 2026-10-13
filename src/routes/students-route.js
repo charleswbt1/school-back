@@ -25,29 +25,27 @@ router.post('', async (req, res) => {
         }
         const course = await Repository.getById(course_id, 'courses');
         const content = await Repository.getById(course.content_id, 'contents');
-        const newStudent = await Repository.create(
-            new StudentDto({
-                school_id: '',
-                user_id: user_id,
-                course_id: course_id,
-                adviser_id: adviser_id || course.adviser_id,
-                coordinator_id: course.coordinator_id,
-                image: course.image,
-                course_name: course.name,
-                total_modules: content.modules?.length || 0,
-                total_cost: course.cost,
-                modules_completed: 0,
-                cost_completed: 0,
-                average: 0,
-                payments: [],
-                documents: [],
-                notes: [],
-                jobs: [],
-                state: 'pending'
-            }),
-            repositoryName,
-            'pending'
-        );
+        const studentDto = new StudentDto({
+            school_id: '',
+            user_id: user_id,
+            course_id: course_id,
+            adviser_id: adviser_id || course.adviser_id,
+            coordinator_id: course.coordinator_id,
+            image: course.image,
+            course_name: course.name,
+            total_modules: content.modules?.length || 0,
+            total_cost: course.cost,
+            modules_completed: 0,
+            cost_completed: 0,
+            average: 0,
+            payments: [],
+            documents: [],
+            notes: [],
+            jobs: []
+        });
+        const newStudent = await Repository.create(studentDto, repositoryName);
+        newStudent.state = 'pending';
+        await Repository.update(newStudent.id, newStudent, repositoryName);
         const user = await Repository.getById(user_id, 'users');
         if (!user.team_id) {
             const coordinator = await Repository.getById(course.coordinator_id, 'users');

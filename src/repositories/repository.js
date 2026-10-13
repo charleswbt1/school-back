@@ -41,7 +41,7 @@ class Repository {
         }));
     }
 
-    async create(data, collectionName, state) {
+    async create(data, collectionName, trace = null) {
         const prefix = collectionName
             .replace(/s$/, '')
             .substring(0, 3)
@@ -49,7 +49,7 @@ class Repository {
         const cleanData = this.removeUndefined(data);
         const newData = {
             id: `${prefix}_${Date.now()}`,
-            state: state || 'active',
+            state: 'active',
             ...cleanData,
             createdAt: new Date(),
             updatedAt: new Date()
@@ -60,13 +60,14 @@ class Repository {
         await docRef.set(newData);
 
         const newDoc = await docRef.get();
+        this.saveAudit(trace, collectionName, 'create', newDoc.id);
         return {
             id: newDoc.id,
             ...newDoc.data()
         };
     }
 
-    async update(id, data, collectionName) {
+    async update(id, data, collectionName, trace = null) {
         const ref = this
             .getCollection(collectionName)
             .doc(id);
@@ -81,13 +82,14 @@ class Repository {
             updatedAt: new Date()
         });
         const updatedDoc = await ref.get();
+        this.saveAudit(trace, collectionName, 'update', updatedDoc.id);
         return {
             id: updatedDoc.id,
             ...updatedDoc.data()
         };
     }
 
-    async delete(id, collectionName) {
+    async delete(id, collectionName, trace = null) {
         const ref = this
             .getCollection(collectionName)
             .doc(id);
@@ -96,12 +98,13 @@ class Repository {
             throw new Error(`${collectionName} ${id} no encontrado`);
         }
         await ref.delete();
+        this.saveAudit(trace, collectionName, 'delete', id);
         return {
             message: 'Eliminado exitosamente'
         };
     }
 
-    async softDelete(id, collectionName) {
+    async softDelete(id, collectionName, trace = null) {
         const ref = this
             .getCollection(collectionName)
             .doc(id);
@@ -110,6 +113,7 @@ class Repository {
             throw new Error(`${collectionName} ${id} no encontrado`);
         }
         await ref.update({ state: 'inactive' });
+        this.saveAudit(trace, collectionName, 'softDelete', id);
         return {
             message: 'Eliminado exitosamente'
         };
@@ -184,17 +188,23 @@ class Repository {
         return data;
     }
 
-    saveUserTrack(userTrackDto) {
+    saveAudit(trace, repositoryName, event, registerId) {
         try {
-            const ref = this.getCollection('user_tracks').doc();
+            if (!trace) { return; }
+            const ref = this.getCollection('audits').doc();
             const data = {
-                ...userTrackDto,
+                team_id: trace.user.team_id,
+                user_id: trace.user.id,
+                event: event,
+                table_name: repositoryName,
+                register_id: registerId,
+                description: trace.description || '',
                 createdAt: new Date(),
                 updatedAt: new Date()
             };
             return ref.set(data);
         } catch (error) {
-            console.error('Error saving user track:', error);
+            console.error('Error saving audit:', error);
         }
     }
 }

@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
@@ -6,6 +7,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 const csv = require("csv-parser");
 const { Readable } = require("stream");
 const Utils = require('../config/utils.js');
+const jwt = require('jsonwebtoken');
 const Repository = require('../repositories/repository.js');
 const UserDto = require('../dto/user-dto.js');
 const StudentDto = require('../dto/student-dto.js');
@@ -75,26 +77,50 @@ router.patch('', async (req, res) => {
 router.post('/login', async (req, res) => {
     const { nick_name, password } = req.body;
     try {
-        const query = await Repository.query(
-            'users',
-            [
-                ['nick_name', '==', nick_name]
-            ]
-        );
+        const query = await Repository.query('users', [['nick_name', '==', nick_name]]);
         if (!query) {
             res.status(401).json({ message: 'user not found' });
         }
         const user = query[0];
         const validPassword = await bcrypt.compare(password, user.password);
-        if (user && validPassword) {
-            res.status(200).json({ role: user.role, user_id: user.id, team_id: user.team_id });
-        } else {
+        if (!validPassword) {
             res.status(401).json({ message: 'Invalid credentials' });
         }
+        const token = jwt.sign(
+            {
+                id: user.id,
+                role: user.role,
+                team_id: user.team_id,
+                first_name: user.first_name
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: '8h'
+            }
+        );
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.ENVIRONMENT === 'production',
+            sameSite: 'lax',
+            maxAge: 8 * 60 * 60 * 1000,
+            path: '/'
+        });
+        res.status(200).json({ role: user.role, user_id: user.id, team_id: user.team_id });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
     }
+});
+router.post('/logout', (req, res) => {
+    res.clearCookie('token', {
+        httpOnly: true,
+        secure: process.env.ENVIRONMENT === 'production',
+        sameSite: 'lax',
+        path: '/'
+    });
+    return res.status(200).json({
+        message: 'Sesión cerrada correctamente'
+    });
 });
 router.post('/password', async (req, res) => {
     const { user_id, new_password } = req.body;
@@ -135,45 +161,41 @@ router.post("/import/students", upload.single("reqFile"), async (req, res) => {
                             });
                             continue;
                         }
-                        const user = await Repository.create(
-                            new UserDto({
-                                nick_name: nickName,
-                                password: await bcrypt.hash(nickName, 10),
-                                role: "student",
-                                first_name: row.firstName,
-                                last_name: row.lastName,
-                                second_last_name: row.secondLastName,
-                                curp: row.curp,
-                                phone: row.phone,
-                                email: row.email,
-                                image: "",
-                                state: "active",
-                                team_id: req.body.team_id
-                            }),
-                            "users"
-                        );
+                        const userDto = new UserDto({
+                            nick_name: nickName,
+                            password: await bcrypt.hash(nickName, 10),
+                            role: "student",
+                            first_name: row.firstName,
+                            last_name: row.lastName,
+                            second_last_name: row.secondLastName,
+                            curp: row.curp,
+                            phone: row.phone,
+                            email: row.email,
+                            image: "",
+                            state: "active",
+                            team_id: req.body.team_id
+                        })
+                        const user = await Repository.create(userDto, "users");
 
-                        await Repository.create(
-                            new StudentDto({
-                                school_id: "",
-                                user_id: user.id,
-                                course_id: course.id,
-                                adviser_id: course.adviser_id,
-                                coordinator_id: course.coordinator_id,
-                                image: course.image,
-                                course_name: course.name,
-                                total_modules: content.modules.length,
-                                total_cost: course.cost,
-                                modules_completed: 0,
-                                cost_completed: 0,
-                                average: 0,
-                                payments: [],
-                                documents: [],
-                                notes: [],
-                                jobs: []
-                            }),
-                            "students"
-                        );
+                        const studentDto = new StudentDto({
+                            school_id: "",
+                            user_id: user.id,
+                            course_id: course.id,
+                            adviser_id: course.adviser_id,
+                            coordinator_id: course.coordinator_id,
+                            image: course.image,
+                            course_name: course.name,
+                            total_modules: content.modules.length,
+                            total_cost: course.cost,
+                            modules_completed: 0,
+                            cost_completed: 0,
+                            average: 0,
+                            payments: [],
+                            documents: [],
+                            notes: [],
+                            jobs: []
+                        })
+                        await Repository.create(studentDto, "students");
                         created++;
                     } catch (error) {
                         console.error(error);

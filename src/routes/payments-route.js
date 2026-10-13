@@ -77,7 +77,7 @@ router.post('/checkout', async (req, res) => {
             success_url: `https://iuc-conecta.com/home/success.html?student_id=${student_id}`,
             cancel_url: 'https://iuc-conecta.com/home/result.html?state=cancel'
         });
-        const payment = await Repository.create({
+        const payment = {
             stripe_id: session.id,
             stripe_data: session,
             student_id: student_id,
@@ -85,7 +85,8 @@ router.post('/checkout', async (req, res) => {
             year: year,
             month: month,
             type: type
-        }, 'payments');
+        }
+        await Repository.create(payment, 'payments');
         res.json({ url: session.url });
     } catch (error) {
         console.error('Stripe checkout error:', error);

@@ -2,16 +2,20 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(cors([
-  { origin: 'http://localhost:3001' },
-  { origin: 'https://school-web-764239827508.us-east1.run.app' }
-]));
-
+app.use(cookieParser());
+app.use(cors({
+  origin: [
+    'http://localhost:3001',
+    'https://school-web-764239827508.us-east1.run.app'
+  ],
+  credentials: true
+}));
 const routesPath = path.join(__dirname, 'src', 'routes');
 
 fs.readdirSync(routesPath)

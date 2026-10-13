@@ -1,14 +1,16 @@
 const express = require('express');
 const router = express.Router();
+const authenticateToken = require('../config/auth-middleware.js');
 const Repository = require('../repositories/repository.js');
-const MessageDto = require('../dto/message-dto.js');
-const repositoryName = 'messages';
+const ChatMessageDto = require('../dto/chat-message-dto.js');
+const repositoryName = 'chat-messages';
 
-router.post('', async (req, res) => {
+router.post('', authenticateToken, async (req, res) => {
     try {
-        const request = new MessageDto(req.body);
+        const request = new ChatMessageDto(req.body);
+        request.sender_name = req.user.first_name;
+        request.sender_id = req.user.id;
         const entity = await Repository.create(request, repositoryName);
-
         res.status(201).json(Repository.formatDates(entity));
     } catch (error) {
         console.error(error);
@@ -16,7 +18,7 @@ router.post('', async (req, res) => {
     }
 });
 
-router.get('', async (req, res) => {
+router.get('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
         const conversationId = req.query.conversation_id;
@@ -49,10 +51,10 @@ router.get('', async (req, res) => {
     }
 });
 
-router.patch('', async (req, res) => {
+router.patch('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
-        const entity = await Repository.update(id, new MessageDto(req.body), repositoryName);
+        const entity = await Repository.update(id, new ChatMessageDto(req.body), repositoryName);
 
         res.status(200).json(Repository.formatDates(entity));
     } catch (error) {

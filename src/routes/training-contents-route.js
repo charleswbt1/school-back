@@ -1,0 +1,56 @@
+const express = require('express');
+const router = express.Router();
+const authenticateToken = require('../config/auth-middleware.js');
+const Utils = require('../config/utils.js');
+const Repository = require('../repositories/repository.js');
+const TrainingContentDto = require('../dto/training-content-dto.js');
+
+const repositoryName = 'training-contents';
+
+router.post('', authenticateToken, async (req, res) => {
+    try {
+        const request = new TrainingContentDto(req.body);
+        const entity = await Repository.create(request, repositoryName, { user: req.user });
+        res.status(201).json(Utils.formatDates(entity));
+    } catch (error) {
+        console.error(`training-contents post: ${error}`);
+        res.status(409).json({ message: error.message });
+    }
+});
+router.get('', authenticateToken, async (req, res) => {
+    try {
+        const id = req.query.id;
+        const state = req.query.state;
+        const coordinatorId = req.query.coordinator_id;
+        var entities;
+        if (id) {
+            const entity = await Repository.getById(id, repositoryName);
+            entities = entity ? [entity] : [];
+        } else {
+            const filters = [];
+            if (state) {
+                filters.push(['state', '==', state]);
+            }
+            if (coordinatorId) {
+                filters.push(['coordinator_id', '==', coordinatorId]);
+            }
+            entities = await Repository.query(repositoryName, filters);
+        }
+        res.status(200).json(entities.map(Utils.formatDates));
+    } catch (error) {
+        console.error(`training-contents get: ${error}`);
+        res.status(412).json({ message: error.message });
+    }
+});
+router.patch('', authenticateToken, async (req, res) => {
+    try {
+        const id = req.query.id;
+        const entity = await Repository.update(id, req.body, repositoryName, { user: req.user });
+        res.status(200).json(Utils.formatDates(entity));
+    } catch (error) {
+        console.error(`training-contents patch: ${error}`);
+        res.status(412).json({ message: error.message });
+    }
+});
+
+module.exports = router;
