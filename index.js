@@ -8,21 +8,22 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const allowedOrigins = [
-    'http://localhost:3001',
-    'https://school-web-764239827508.us-east1.run.app'
+  'http://localhost:3001',
+  'https://iuc-conecta.com',
+  'https://school-web-764239827508.us-east1.run.app'
 ];
 
 const corsOptions = {
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            return callback(null, true);
-        }
-        console.error('Origen bloqueado por CORS:', origin);
-        return callback(new Error('Origen no permitido por CORS'));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    console.error('Origen bloqueado por CORS:', origin);
+    return callback(new Error('Origen no permitido por CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 
 app.use(cors(corsOptions));
