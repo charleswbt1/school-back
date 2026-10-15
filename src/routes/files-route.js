@@ -65,6 +65,7 @@ router.post('/pdf', async (req, res) => {
         const { student_id, type } = req.body;
         const student = await Repository.getById(student_id, 'students');
         const user = await Repository.getById(student.user_id, 'users');
+        const course = await Repository.getById(student.course_id, 'courses');
         const date = new Date();
         const dateText = date.toLocaleDateString('es-MX', {
             day: 'numeric', month: 'long', year: 'numeric'
@@ -73,18 +74,17 @@ router.post('/pdf', async (req, res) => {
         const studentId = student.school_id.replace('-', '') || student_id.replace('STU_', '');
         const curp = user.curp || 'N/A';
         const studentName = `${user.first_name} ${user.last_name} ${user.second_last_name}`;
-        const courseName = student.course_name;
 
         let html = (await fs.readFile(path.join(__dirname, `../templates/${type}.html`), 'utf8'))
             .replace('{{name}}', studentName)
-            .replaceAll('{{course}}', courseName)
+            .replaceAll('{{course}}', course.name)
             .replace('{{schoolId}}', studentId)
             .replace('{{date}}', dateText)
             .replace('{{curp}}', curp);
         if (type === 'credential') {
             const logo = await fs.readFile(path.join(__dirname, `../templates/logo.jpg`));
             const logoBase64 = `data:image/jpeg;base64,${logo.toString('base64')}`;
-            const contentQr = `${studentId}\n${curp}\n${studentName}\n${courseName}`;
+            const contentQr = `${studentId}\n${curp}\n${studentName}\n${course.name}`;
             const qr = await QRCode.toDataURL(contentQr);
             const perfilImage = user.image || 'https://storage.googleapis.com/school-source/web/perfil.jpg'
             html = html.replace('{{logo}}', logoBase64)
@@ -98,7 +98,6 @@ router.post('/pdf', async (req, res) => {
             const waterBase64 = `data:image/png;base64,${water.toString('base64')}`;
             const signature = await fs.readFile(path.join(__dirname, `../templates/signature.png`));
             const signatureBase64 = `data:image/png;base64,${signature.toString('base64')}`;
-            const course = await Repository.getById(student.course_id, 'courses');
             html = html.replace('{{header}}', headerBase64)
                 .replace('{{watermark}}', waterBase64)
                 .replace('{{signature}}', signatureBase64)
