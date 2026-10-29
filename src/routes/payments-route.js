@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const authenticateToken = require('../config/auth-middleware.js');
 const stripe = require('../config/stripe');
 const Repository = require('../repositories/repository');
 const PaymentDto = require('../dto/payment-dto.js');
 
-router.post('/account', async (req, res) => {
+router.post('/account', authenticateToken, async (req, res) => {
     try {
         const { school_id, school_email } = req.body;
         if (!school_email || !school_id) {
@@ -41,7 +42,7 @@ router.post('/account', async (req, res) => {
         res.status(500).json(error);
     }
 });
-router.post('/checkout', async (req, res) => {
+router.post('/checkout', authenticateToken, async (req, res) => {
     try {
         const { student_id, amount, year, month, type } = req.body;
         const student = await Repository.getById(student_id, 'students');
@@ -94,7 +95,7 @@ router.post('/checkout', async (req, res) => {
     }
 });
 
-router.get('/info', async (req, res) => {
+router.get('/info', authenticateToken, async (req, res) => {
     const account = await stripe.accounts.retrieve("acct_1TyxJ875gm7xWle1");
 
     console.log(account.capabilities);

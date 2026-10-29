@@ -14,7 +14,7 @@ class TrainingJobClassDto {
     }
 }
 
-class TrainingClassesDto {
+class TrainingClassDto {
     constructor({
         course_id,
         content_id,
@@ -24,6 +24,7 @@ class TrainingClassesDto {
         materials = [],
         jobs = []
     }) {
+        this.id = id || `CLASS_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
         this.course_id = course_id;
         this.content_id = content_id;
         this.module_id = module_id;
@@ -34,4 +35,4 @@ class TrainingClassesDto {
     }
 }
 
-module.exports = TrainingClassesDto;
+module.exports = TrainingClassDto;

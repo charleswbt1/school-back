@@ -8,9 +8,12 @@ const Repository = require('../repositories/repository');
 const upload = multer({ storage: multer.memoryStorage() });
 const fs = require('fs').promises;
 const path = require('path');
+const authenticateToken = require('../config/auth-middleware.js');
+
 
 router.post(
     '/',
+    authenticateToken,
     upload.fields([
         { name: 'reqFile', maxCount: 1 }
     ]),
@@ -47,7 +50,7 @@ router.post(
         }
     }
 );
-router.delete('/', async (req, res) => {
+router.delete('/', authenticateToken, async (req, res) => {
     try {
         const { url } = req.body;
         const bucket = getBucket();
@@ -60,7 +63,7 @@ router.delete('/', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
-router.post('/pdf', async (req, res) => {
+router.post('/pdf', authenticateToken, async (req, res) => {
     try {
         const { student_id, type } = req.body;
         const student = await Repository.getById(student_id, 'students');

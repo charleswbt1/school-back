@@ -13,6 +13,7 @@ class TrainingCostDto {
         this.title_two = title_two;
     }
 }
+
 class TrainingAsignatureDto {
     constructor({
         teacher_id,
@@ -33,7 +34,6 @@ class TrainingCourseDto {
         coordinator_id,
         squad_id,
         adviser_id,
-        period_id,
         image,
         rvoe,
         date_init,
@@ -43,7 +43,7 @@ class TrainingCourseDto {
         cost,
         cost_market
     }) {
-        this.id = id || `COU_${Date.now()}`;
+        this.id = id || `COUR_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`; 
         this.name = name;
         this.description = description;
         this.level = level;
@@ -51,7 +51,6 @@ class TrainingCourseDto {
         this.coordinator_id = coordinator_id;
         this.squad_id = squad_id;
         this.adviser_id = adviser_id;
-        this.period_id = period_id;
         this.image = image;
         this.rvoe = rvoe;
         this.date_init = date_init;

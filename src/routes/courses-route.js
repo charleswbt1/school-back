@@ -1,14 +1,18 @@
 const express = require('express');
 const router = express.Router();
+const authenticateToken = require('../config/auth-middleware.js');
 const Utils = require('../config/utils.js');
 const Repository = require('../repositories/repository.js');
 const CourseDto = require('../dto/course-dto.js');
 
 const repositoryName = 'courses';
 
-router.post('', async (req, res) => {
+router.post('', authenticateToken, async (req, res) => {
     try {
         const request = new CourseDto(req.body);
+        if (req.user.role === 'coordinator') {
+            request.coordinator_id = req.user.id;
+        }
         if (!request.coordinator_id || !request.teacher_id || !request.content_id || !request.name || !request.date_init) {
             throw new Error('Faltan datos obligatorios');
         }
@@ -25,93 +29,59 @@ router.post('', async (req, res) => {
         request.cost_reinscription = request.offer_cost_reinscription + 1000;
         request.cost_title = request.offer_cost_title + 10000;
         request.cost_title_two = request.offer_cost_title_two + 10000;
-
-        const periods = await Repository.query(
-            'periods',
-            [
-                ['coordinator_id', '==', request.coordinator_id],
-                ['year', '==', year],
-                ['month', '==', month]
-            ]
-        );
         const entity = await Repository.create(request, repositoryName);
-
-        if (periods.length > 0) {
-            const period = periods[0];
-            period.courses.push(request.name);
-            await Repository.update(period.id, period, 'periods');
-        } else {
-            const newPeriod = {
-                coordinator_id: request.coordinator_id,
-                month: month,
-                year: year,
-                courses: [request.name],
-                coursesId: [entity.id]
-            }
-            await Repository.create(newPeriod, 'periods');
-        }
         res.status(201).json(Utils.formatDates(entity));
     } catch (error) {
         console.error(error);
         res.status(409).json({ message: error.message });
     }
 });
-router.get('', async (req, res) => {
+router.get('', authenticateToken, async (req, res) => {
     try {
-        const id = req.query.id;
-        const state = req.query.state;
-        const year = req.query.year;
-        const month = req.query.month;
-        const coordinatorId = req.query.coordinator_id;
-        const teacherId = req.query.teacher_id;
-        const available = req.query.available;
-        const adviserId = req.query.adviser_id;
-
-        var entities;
-        if (id) {
-            const entity = await Repository.getById(id, repositoryName);
-            entities = entity ? [entity] : [];
-        } else {
-            const filters = [];
-            if (available) {
+        const userId = req.user.id;
+        const role = req.user.role;
+        const filters = [];
+        var entities = [];
+        switch (role) {
+            case 'counter':
+                filters.push(['state', '==', 'active']);
+                entities = await Repository.query(repositoryName, filters);
+                break;
+            case 'coordinator':
+                filters.push(['coordinator_id', '==', userId]);
+                entities = await Repository.query(repositoryName, filters);
+                break;
+            case 'teacher':
+                filters.push(['teacher_id', '==', userId]);
+                filters.push(['state', '==', 'active']);
+                entities = await Repository.query(repositoryName, filters);
+                break;
+            case 'adviser':
                 const today = new Date().toISOString().split('T')[0];
                 filters.push(['state', '==', 'active']);
                 filters.push(['date_init', '>=', today]);
                 entities = await Repository.query(repositoryName, filters);
-                if (coordinatorId) {
-                    entities = entities.filter(entity => entity.coordinator_id === coordinatorId);
-                }
-                if (adviserId) {
-                    entities = entities.filter(entity => entity.adviser_id === adviserId);
-                }
-            } else {
-                if (state) {
-                    filters.push(['state', '==', state]);
-                }
-                if (coordinatorId) {
-                    filters.push(['coordinator_id', '==', coordinatorId]);
-                }
-                if (adviserId) {
-                    filters.push(['adviser_id', '==', adviserId]);
-                }
-                if (year && month) {
-                    filters.push(['year', '==', year]);
-                    filters.push(['month', '==', month]);
-                }
-                if (teacherId) {
-                    filters.push(['teacher_id', '==', teacherId]);
-                    filters.push(['state', '==', 'active']);
-                }
-                entities = await Repository.query(repositoryName, filters);
-            }
+                entities = entities.filter(entity => entity.adviser_id === userId);
+                break;
         }
-        res.status(200).json(entities.map(Utils.formatDates));
+        entities.sort((a, b) => {
+            const teamComparison = String(a.team_id).localeCompare(String(b.team_id));
+            if (teamComparison !== 0) {
+                return teamComparison;
+            }
+            const coordinatorComparison = String(a.coordinator_id).localeCompare(String(b.coordinator_id));
+            if (coordinatorComparison !== 0) {
+                return coordinatorComparison;
+            }
+            return new Date(a.date_init) - new Date(b.date_init);
+        });
+        res.status(200).json(entities);
     } catch (error) {
         console.error(error);
         res.status(412).json({ message: error.message });
     }
 });
-router.patch('', async (req, res) => {
+router.patch('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
         const squad = await Repository.getById(req.body.squad_id, 'squads');
@@ -124,7 +94,38 @@ router.patch('', async (req, res) => {
     }
 });
 
-router.get('/review', async (req, res) => {
+router.get('/availables', async (req, res) => {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const filters = [
+            ['state', '==', 'active'],
+            ['date_init', '>=', today]
+        ];
+        const entities = await Repository.query(repositoryName, filters);
+        res.status(200).json(entities.map(Utils.formatDates));
+    } catch (error) {
+        console.error(error);
+        res.status(412).json({ message: error.message });
+    }
+});
+router.get('/detail', async (req, res) => {
+    try {
+        const id = req.query.id;
+        const course = await Repository.getById(id, 'courses');
+        const content = await Repository.getById(course.content_id, 'contents');
+        const adviser = await Repository.getById(course.adviser_id, 'users');
+
+        res.status(200).json({
+            modules: content.modules,
+            adviser: adviser
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(412).json({ message: error.message });
+    }
+});
+
+router.get('/review', authenticateToken, async (req, res) => {
     try {
         const { year, month, team } = req.query;
         const coordinators = await Repository.query('users', [
@@ -193,21 +194,7 @@ router.get('/review', async (req, res) => {
         });
     }
 });
-router.get('/periods', async (req, res) => {
-    try {
-        const coordinatorId = req.query.coordinator_id;
-        const filters = [];
-        if (coordinatorId) {
-            filters.push(['coordinator_id', '==', coordinatorId]);
-        }
-        const entities = await Repository.query('periods', filters);
-        res.status(200).json(entities.map(Utils.formatDates));
-    } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
-    }
-});
-router.get('/student', async (req, res) => {
+router.get('/student', authenticateToken, async (req, res) => {
     try {
         const studentId = req.query.student_id;
         const student = await Repository.getById(studentId, 'students');
@@ -232,30 +219,8 @@ router.get('/student', async (req, res) => {
         res.status(412).json({ message: error.message });
     }
 });
-router.get('/teachers', async (req, res) => {
-    try {
-        const teachers = await Repository.query('users', [['role', '==', 'teacher']]);
-        const today = new Date().toISOString().split('T')[0];
-        const courses = await Repository.query(
-            'courses', [
-            ['state', '==', 'active'],
-            ['date_init', '<', today]
-        ]
-        );
-        const response = teachers.map(teacher => {
-            const teacherCourses = courses.filter(course => course.teacher_id === teacher.id);
-            return {
-                ...teacher,
-                courses: teacherCourses
-            };
-        });
-        res.status(200).json(response);
-    } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
-    }
-});
-router.patch('/change', async (req, res) => {
+
+router.patch('/change', authenticateToken, async (req, res) => {
     try {
         const courseOriginId = req.query.course_origin_id;
         const courseDestinationId = req.query.course_destination_id;

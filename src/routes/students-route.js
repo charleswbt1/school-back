@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const authenticateToken = require('../config/auth-middleware.js');
 const Utils = require('../config/utils.js');
 const { getBucket } = require('../config/firebase');
 const Repository = require('../repositories/repository.js');
@@ -7,7 +8,7 @@ const StudentDto = require('../dto/student-dto.js');
 
 const repositoryName = 'students';
 
-router.post('', async (req, res) => {
+router.post('', authenticateToken, async (req, res) => {
     const { user_id, course_id, adviser_id } = req.body;
     try {
         const student = await Repository.query(
@@ -61,7 +62,7 @@ router.post('', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-router.get('', async (req, res) => {
+router.get('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
         const state = req.query.state;
@@ -87,7 +88,7 @@ router.get('', async (req, res) => {
         res.status(412).json({ message: error.message });
     }
 });
-router.patch('', async (req, res) => {
+router.patch('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
         const entity = await Repository.update(id, req.body, repositoryName);
@@ -97,7 +98,7 @@ router.patch('', async (req, res) => {
         res.status(412).json({ message: error.message });
     }
 });
-router.delete('', async (req, res) => {
+router.delete('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
         const entity = await Repository.getById(id, repositoryName);
@@ -117,9 +118,9 @@ router.delete('', async (req, res) => {
     }
 });
 
-router.get('/courses', async (req, res) => {
+router.get('/courses', authenticateToken, async (req, res) => {
     try {
-        const userId = req.query.user_id;
+        const userId = req.user.id;
         const entities = await Repository.query(
             'students',
             [
@@ -133,15 +134,14 @@ router.get('/courses', async (req, res) => {
             image: entity.image
         })));
     } catch (error) {
-        console.error(error);
+        console.error(`students courses: ${error}`);
         res.status(412).json({ message: error.message });
     }
 });
-router.get('/data', async (req, res) => {
+router.get('/data', authenticateToken, async (req, res) => {
     try {
-        const adviserId = req.query.adviser_id;
-        const coordinatorId = req.query.coordinator_id;
-        const teacherId = req.query.teacher_id;
+        const userId = req.user.id;
+        const role = req.user.role;
         const courseId = req.query.course_id;
 
         let modulesTotal = 0;
@@ -150,13 +150,13 @@ router.get('/data', async (req, res) => {
         const filters = [];
         let entities = [];
 
-        if (adviserId) {
+        if (role === 'adviser') {
             const today = new Date().toISOString().split('T')[0];
             const coursesAvaliables = await Repository.query('courses', [
                 ['state', '==', 'active'],
                 ['date_init', '>=', today]
             ]);
-            const courses = coursesAvaliables.filter(course => course.adviser_id === adviserId);
+            const courses = coursesAvaliables.filter(course => course.adviser_id === userId);
             for (const course of courses) {
                 const students = await Repository.query(repositoryName, [
                     ['course_id', '==', course.id]
@@ -169,8 +169,8 @@ router.get('/data', async (req, res) => {
                 );
             }
         }
-        if (coordinatorId) {
-            filters.push(['coordinator_id', '==', coordinatorId]);
+        if (role === 'coordinator') {
+            filters.push(['coordinator_id', '==', userId]);
             entities = await Repository.query(repositoryName, filters);
         }
         if (courseId) {
@@ -211,7 +211,7 @@ router.get('/data', async (req, res) => {
         res.status(412).json({ message: error.message });
     }
 });
-router.post('/bill', async (req, res) => {
+router.post('/bill', authenticateToken, async (req, res) => {
     const { url, amount, student_id, year, month, type, source, is_refund } = req.body;
     try {
         if (amount <= 0) {
@@ -255,7 +255,7 @@ router.post('/bill', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-router.delete('/bill', async (req, res) => {
+router.delete('/bill', authenticateToken, async (req, res) => {
     try {
         const { student_id, payment_id } = req.body;
         const student = await Repository.getById(student_id, repositoryName);
@@ -279,7 +279,7 @@ router.delete('/bill', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-router.post('/document', async (req, res) => {
+router.post('/document', authenticateToken, async (req, res) => {
     const { url, type, student_id, job_id, job_score } = req.body;
     try {
         const student = await Repository.getById(student_id, repositoryName);
@@ -319,7 +319,7 @@ router.post('/document', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-router.delete('/document', async (req, res) => {
+router.delete('/document', authenticateToken, async (req, res) => {
     try {
         const { student_id, type, job_id } = req.body;
         const student = await Repository.getById(student_id, repositoryName);
@@ -349,7 +349,7 @@ router.delete('/document', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-router.post('/qualification', async (req, res) => {
+router.post('/qualification', authenticateToken, async (req, res) => {
     const { module_id, qualification, student_id, state } = req.body;
     try {
         if (qualification <= 0 || qualification > 10) {
@@ -393,7 +393,7 @@ router.post('/qualification', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-router.post('/job-qualification', async (req, res) => {
+router.post('/job-qualification', authenticateToken, async (req, res) => {
     const { student_id, job_id, qualification } = req.body;
     try {
         if (qualification < 0 || qualification > 10) {
@@ -427,7 +427,7 @@ router.post('/job-qualification', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-router.get('/control', async (req, res) => {
+router.get('/control', authenticateToken, async (req, res) => {
     try {
         const courseId = req.query.course_id;
         const course = await Repository.getById(courseId, 'courses');

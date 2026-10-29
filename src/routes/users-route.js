@@ -11,10 +11,11 @@ const jwt = require('jsonwebtoken');
 const Repository = require('../repositories/repository.js');
 const UserDto = require('../dto/user-dto.js');
 const StudentDto = require('../dto/student-dto.js');
+const authenticateToken = require('../config/auth-middleware.js');
 
 const repositoryName = 'users';
 
-router.post('', async (req, res) => {
+router.post('', authenticateToken, async (req, res) => {
     try {
         req.body.password = await bcrypt.hash(req.body.password, 10);
         const request = new UserDto(req.body);
@@ -38,16 +39,13 @@ router.post('', async (req, res) => {
         res.status(409).json({ message: error.message });
     }
 });
-router.get('', async (req, res) => {
+router.get('', authenticateToken, async (req, res) => {
     try {
-        const id = req.query.id;
+        const id = req.user.id;
         const state = req.query.state;
         const role = req.query.role;
         var entities;
-        if (id) {
-            const entity = await Repository.getById(id, repositoryName);
-            entities = entity ? [entity] : [];
-        } else {
+        if (role || state) {
             const filters = [];
             if (state) {
                 filters.push(['state', '==', state]);
@@ -56,6 +54,9 @@ router.get('', async (req, res) => {
                 filters.push(['role', '==', role]);
             }
             entities = await Repository.query(repositoryName, filters);
+        } else {
+            const entity = await Repository.getById(id, repositoryName);
+            entities = entity ? [entity] : [];
         }
         res.status(200).json(entities.map(Utils.formatDates));
     } catch (error) {
@@ -63,9 +64,9 @@ router.get('', async (req, res) => {
         res.status(412).json({ message: error.message });
     }
 });
-router.patch('', async (req, res) => {
+router.patch('', authenticateToken, async (req, res) => {
     try {
-        const id = req.query.id;
+        const id = req.user.id;
         const entity = await Repository.update(id, req.body, repositoryName);
         res.status(200).json(Utils.formatDates(entity));
     } catch (error) {
@@ -101,7 +102,7 @@ router.post('/login', async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.ENVIRONMENT === 'production',
-            sameSite: 'none',
+            sameSite: process.env.ENVIRONMENT === 'production' ? 'none' : 'lax',
             maxAge: 8 * 60 * 60 * 1000,
             path: '/'
         });
@@ -115,14 +116,14 @@ router.post('/logout', (req, res) => {
     res.clearCookie('token', {
         httpOnly: true,
         secure: process.env.ENVIRONMENT === 'production',
-        sameSite: 'none',
+        sameSite: process.env.ENVIRONMENT === 'production' ? 'none' : 'lax',
         path: '/'
     });
     return res.status(200).json({
         message: 'Sesión cerrada correctamente'
     });
 });
-router.post('/password', async (req, res) => {
+router.post('/password', authenticateToken, async (req, res) => {
     const { user_id, new_password } = req.body;
     try {
         const pass = await bcrypt.hash(req.body.new_password, 10);
@@ -136,7 +137,7 @@ router.post('/password', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-router.post("/import/students", upload.single("reqFile"), async (req, res) => {
+router.post("/import/students", authenticateToken, upload.single("reqFile"), async (req, res) => {
     try {
         const rows = [];
         const course = await Repository.getById(req.body.course_id, "courses");

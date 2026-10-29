@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const authenticateToken = require('../config/auth-middleware.js');
 const Utils = require('../config/utils.js');
 const Repository = require('../repositories/repository.js');
 const SquadDto = require('../dto/squad-dto.js');
 
 const repositoryName = 'squads';
 
-router.post('', async (req, res) => {
+router.post('', authenticateToken, async (req, res) => {
     try {
         const request = new SquadDto(req.body);
         const entity = await Repository.create(request, repositoryName);
@@ -16,7 +17,7 @@ router.post('', async (req, res) => {
         res.status(409).json({ message: error.message });
     }
 });
-router.get('', async (req, res) => {
+router.get('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
         const state = req.query.state;
@@ -37,7 +38,7 @@ router.get('', async (req, res) => {
         res.status(412).json({ message: error.message });
     }
 });
-router.patch('', async (req, res) => {
+router.patch('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
         const entity = await Repository.update(id, req.body, repositoryName);

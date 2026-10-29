@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const authenticateToken = require('../config/auth-middleware.js');
 const Utils = require('../config/utils.js');
 const Repository = require('../repositories/repository.js');
 const ClassesDto = require('../dto/classes-dto.js');
 
 const repositoryName = 'classes';
 
-router.post('', async (req, res) => {
+router.post('', authenticateToken, async (req, res) => {
     try {
         const request = new ClassesDto(req.body);
         const entity = await Repository.create(request, repositoryName);
@@ -16,7 +17,7 @@ router.post('', async (req, res) => {
         res.status(409).json({ message: error.message });
     }
 });
-router.get('', async (req, res) => {
+router.get('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
         const courseId = req.query.course_id;
@@ -45,7 +46,7 @@ router.get('', async (req, res) => {
         res.status(412).json({ message: error.message });
     }
 });
-router.patch('', async (req, res) => {
+router.patch('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
         const entity = await Repository.update(id, new ClassesDto(req.body), repositoryName);

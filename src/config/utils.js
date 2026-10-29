@@ -9,90 +9,45 @@ class StorageUtil {
             const fileName = `${folder}/${Date.now()}-${file.originalname}`;
             const bucketFile = bucket.file(fileName);
 
-            await bucketFile.save(
-                file.buffer,
-                {
-                    metadata: {
-                        contentType:
-                            file.mimetype
-                    }
-                }
-            );
+            await bucketFile.save(file.buffer, {
+                metadata: { contentType: file.mimetype }
+            });
 
-            const [url] =
-                await bucketFile.getSignedUrl({
-                    action: 'read',
-                    expires:
-                        '03-01-2500'
-                });
+            const [url] = await bucketFile.getSignedUrl({
+                action: 'read',
+                expires: '03-01-2500'
+            });
 
-            return {
-                fileName,
-                url
-            };
-
+            return { fileName, url };
         } catch (error) {
-
-            console.error(
-                'Error uploading file:',
-                error
-            );
-
+            console.error('Error uploading file:', error);
             throw error;
         }
     }
 
-    static async deleteFile(
-        fileName
-    ) {
-
+    static async deleteFile(fileName) {
         try {
-
             const bucket = getBucket();
-
-            await bucket
-                .file(fileName)
-                .delete();
-
+            await bucket.file(fileName).delete();
             return true;
-
         } catch (error) {
-
-            console.error(
-                'Error deleting file:',
-                error
-            );
-
+            console.error('Error deleting file:', error);
             throw error;
         }
     }
 
-    static async getSignedUrl(
-        fileName
-    ) {
-
+    static async getSignedUrl(fileName) {
         try {
-
             const bucket = getBucket();
-
-            const [url] =
-                await bucket
-                    .file(fileName)
-                    .getSignedUrl({
-                        action: 'read',
-                        expires:
-                            '03-01-2500'
-                    });
-
+            const [url] = await bucket
+                .file(fileName)
+                .getSignedUrl({
+                    action: 'read',
+                    expires: '03-01-2500'
+                });
             return url;
-
         } catch (error) {
-
-            console.error(
-                'Error generating signed url:',
-                error
-            );
-
+            console.error('Error generating signed url:', error);
             throw error;
         }
     }

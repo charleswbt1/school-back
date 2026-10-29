@@ -1,14 +1,19 @@
 const express = require('express');
 const router = express.Router();
+const authenticateToken = require('../config/auth-middleware.js');
 const Utils = require('../config/utils.js');
 const Repository = require('../repositories/repository.js');
 const ContentDto = require('../dto/content-dto.js');
 
 const repositoryName = 'contents';
 
-router.post('', async (req, res) => {
+router.post('', authenticateToken, async (req, res) => {
     try {
+        if (req.user.role != 'coordinator') {
+            throw new Error(`${req.user.role} no tiene permiso`);
+        }
         const request = new ContentDto(req.body);
+        request.coordinator_id = req.user.id;
         const entity = await Repository.create(request, repositoryName);
         res.status(201).json(Utils.formatDates(entity));
     } catch (error) {
@@ -16,11 +21,12 @@ router.post('', async (req, res) => {
         res.status(409).json({ message: error.message });
     }
 });
-router.get('', async (req, res) => {
+router.get('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
         const state = req.query.state;
-        const coordinatorId = req.query.coordinator_id;
+        const userId = req.user.id;
+        const role = req.user.role;
         var entities;
         if (id) {
             const entity = await Repository.getById(id, repositoryName);
@@ -30,8 +36,8 @@ router.get('', async (req, res) => {
             if (state) {
                 filters.push(['state', '==', state]);
             }
-            if (coordinatorId) {
-                filters.push(['coordinator_id', '==', coordinatorId]);
+            if (role === 'coordinator') {
+                filters.push(['coordinator_id', '==', userId]);
             }
             entities = await Repository.query(repositoryName, filters);
         }
@@ -41,7 +47,7 @@ router.get('', async (req, res) => {
         res.status(412).json({ message: error.message });
     }
 });
-router.patch('', async (req, res) => {
+router.patch('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
         const entity = await Repository.update(id, req.body, repositoryName);

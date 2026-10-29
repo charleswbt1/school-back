@@ -1,26 +1,35 @@
 const express = require('express');
 const router = express.Router();
+const authenticateToken = require('../config/auth-middleware.js');
 const Utils = require('../config/utils.js');
 const Repository = require('../repositories/repository.js');
 const ExamDto = require('../dto/exam-dto.js');
 
 const repositoryName = 'exams';
 
-router.post('', async (req, res) => {
+router.post('', authenticateToken, async (req, res) => {
     try {
+        const userId = req.user.id;
+        const role = req.user.role;
         const request = new ExamDto(req.body);
+        if (role === 'teacher') {
+            request.teacher_id = userId;
+        }
+        if (role === 'coordinator') {
+            request.coordinator_id = userId;
+        }
         const entity = await Repository.create(request, repositoryName);
         res.status(201).json(Utils.formatDates(entity));
     } catch (error) {
         res.status(409).json({ message: error.message });
     }
 });
-router.get('', async (req, res) => {
+router.get('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
         const state = req.query.state;
-        const teacherId = req.query.teacher_id;
-        const coordinatorId = req.query.coordinator_id;
+        const userId = req.user.id;
+        const role = req.user.role;
         var entities;
         if (id) {
             const entity = await Repository.getById(id, repositoryName);
@@ -30,11 +39,11 @@ router.get('', async (req, res) => {
             if (state) {
                 filters.push(['state', '==', state]);
             }
-            if (teacherId) {
-                filters.push(['teacher_id', '==', teacherId]);
+            if (role === 'teacher') {
+                filters.push(['teacher_id', '==', userId]);
             }
-            if (coordinatorId) {
-                filters.push(['coordinator_id', '==', coordinatorId]);
+            if (role === 'coordinator') {
+                filters.push(['coordinator_id', '==', userId]);
             }
             entities = await Repository.query(repositoryName, filters);
         }
@@ -43,7 +52,7 @@ router.get('', async (req, res) => {
         res.status(412).json({ message: error.message });
     }
 });
-router.patch('', async (req, res) => {
+router.patch('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
         const entity = await Repository.update(id, req.body, repositoryName);
@@ -52,7 +61,7 @@ router.patch('', async (req, res) => {
         res.status(412).json({ message: error.message });
     }
 });
-router.delete('', async (req, res) => {
+router.delete('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
         const result = await Repository.delete(id, repositoryName);
@@ -62,7 +71,7 @@ router.delete('', async (req, res) => {
     }
 });
 
-router.get('/questions', async (req, res) => {
+router.get('/questions', authenticateToken, async (req, res) => {
     try {
         const id = req.query.exam_id;
         const entity = await Repository.getById(id, repositoryName);
@@ -88,7 +97,7 @@ router.get('/questions', async (req, res) => {
         res.status(412).json({ message: error.message });
     }
 });
-router.post('/evaluate', async (req, res) => {
+router.post('/evaluate', authenticateToken, async (req, res) => {
     try {
         const request = req.body;
         const exam = await Repository.getById(request.exam_id, repositoryName);
