@@ -10,11 +10,13 @@ router.post('', authenticateToken, async (req, res) => {
         const request = new ChatMessageDto(req.body);
         request.sender_name = req.user.first_name;
         request.sender_id = req.user.id;
-        const entity = await Repository.create(request, repositoryName);
+        const entity = await Repository.create(
+            request, repositoryName
+        );
         res.status(201).json(Repository.formatDates(entity));
     } catch (error) {
-        console.error(error);
-        res.status(409).json({ message: error.message });
+        console.error('chat message post', error);
+        res.status(409).json({ message: 'Fallo al registrar mensaje' });
     }
 });
 
@@ -46,20 +48,21 @@ router.get('', authenticateToken, async (req, res) => {
         }
         res.status(200).json(entities.map(entity => Repository.formatDates(entity)));
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('chat message get', error);
+        res.status(412).json({ message: 'Fallo al consultar mensaje' });
     }
 });
 
 router.patch('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
-        const entity = await Repository.update(id, new ChatMessageDto(req.body), repositoryName);
-
+        const entity = await Repository.update(
+            id, new ChatMessageDto(req.body), repositoryName
+        );
         res.status(200).json(Repository.formatDates(entity));
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('chat message patch', error);
+        res.status(412).json({ message: 'Fallo al actualizar mensaje' });
     }
 });
 

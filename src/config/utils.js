@@ -20,7 +20,7 @@ class StorageUtil {
 
             return { fileName, url };
         } catch (error) {
-            console.error('Error uploading file:', error);
+            console.error('Utils uploading file', error);
             throw error;
         }
     }
@@ -31,7 +31,7 @@ class StorageUtil {
             await bucket.file(fileName).delete();
             return true;
         } catch (error) {
-            console.error('Error deleting file:', error);
+            console.error('Utils deleting file', error);
             throw error;
         }
     }
@@ -47,7 +47,7 @@ class StorageUtil {
                 });
             return url;
         } catch (error) {
-            console.error('Error generating signed url:', error);
+            console.error('Utils generating signed url', error);
             throw error;
         }
     }

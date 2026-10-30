@@ -32,11 +32,13 @@ router.post('', authenticateToken, async (req, res) => {
             throw new Error(`El CURP ${request.curp} ya está registrado para el rol ${request.role} nick_name ${curp[0].nick_name}`);
         }
 
-        const entity = await Repository.create(request, repositoryName);
+        const entity = await Repository.create(
+            request, repositoryName, { user: req.user }
+        );
         res.status(201).json(Utils.formatDates(entity));
     } catch (error) {
-        console.error(error);
-        res.status(409).json({ message: error.message });
+        console.error('users post', error);
+        res.status(409).json({ message: 'Fallo al registrar usuario' });
     }
 });
 router.get('', authenticateToken, async (req, res) => {
@@ -60,18 +62,20 @@ router.get('', authenticateToken, async (req, res) => {
         }
         res.status(200).json(entities.map(Utils.formatDates));
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('users get', error);
+        res.status(412).json({ message: 'Fallo al consultar usuario' });
     }
 });
 router.patch('', authenticateToken, async (req, res) => {
     try {
         const id = req.user.id;
-        const entity = await Repository.update(id, req.body, repositoryName);
+        const entity = await Repository.update(
+            id, req.body, repositoryName, { user: req.user }
+        );
         res.status(200).json(Utils.formatDates(entity));
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('users patch', error);
+        res.status(412).json({ message: 'Fallo al actualizar usuario' });
     }
 });
 
@@ -108,8 +112,8 @@ router.post('/login', async (req, res) => {
         });
         res.status(200).json({ role: user.role, user_id: user.id, team_id: user.team_id });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('users login', error);
+        res.status(500).json({ message: 'Fallo al iniciar sesión' });
     }
 });
 router.post('/logout', (req, res) => {
@@ -129,12 +133,13 @@ router.post('/password', authenticateToken, async (req, res) => {
         const pass = await bcrypt.hash(req.body.new_password, 10);
         const user = await Repository.getById(user_id, repositoryName);
         user.password = pass;
-        await Repository.update(user_id, user, repositoryName);
-
+        await Repository.update(
+            user_id, user, repositoryName, { user: req.user }
+        );
         res.status(200).json({ role: user.role, user_id: user.id });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('users password', error);
+        res.status(500).json({ message: 'Fallo al actualizar contraseña' });
     }
 });
 router.post("/import/students", authenticateToken, upload.single("reqFile"), async (req, res) => {
@@ -199,7 +204,7 @@ router.post("/import/students", authenticateToken, upload.single("reqFile"), asy
                         await Repository.create(studentDto, "students");
                         created++;
                     } catch (error) {
-                        console.error(error);
+                        console.error('import student:', error);
                         errors.push({
                             row: index + 2,
                             error: error.message
@@ -213,9 +218,8 @@ router.post("/import/students", authenticateToken, upload.single("reqFile"), asy
                 });
             });
     } catch (error) {
-        res.status(500).json({
-            message: error.message
-        });
+        console.error('users import students:', error);
+        res.status(500).json({ message: 'Fallo al importar alumnos' });
     }
 });
 function generateNickName(firstName, lastName, secondLastName, curp) {

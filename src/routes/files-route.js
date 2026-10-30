@@ -46,7 +46,8 @@ router.post(
             }
             res.status(201).json({ url: `https://storage.googleapis.com/${bucket.name}/${path}` });
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            console.error('files save', error);
+            res.status(500).json({ message: 'Fallo al registrar archivo' });
         }
     }
 );
@@ -60,7 +61,8 @@ router.delete('/', authenticateToken, async (req, res) => {
         await bucket.file(filePath).delete();
         res.status(200).json({ message: "Archivo eliminado correctamente" });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('files delete', error);
+        res.status(500).json({ message: 'Fallo al borrar archivo' });
     }
 });
 router.post('/pdf', authenticateToken, async (req, res) => {
@@ -140,7 +142,8 @@ router.post('/pdf', authenticateToken, async (req, res) => {
         });
         res.status(201).send(pdf);
     } catch (error) {
-        res.status(409).json({ message: error.message });
+        console.error('files pdf', error);
+        res.status(409).json({ message: 'Fallo al generar documento' });
     }
 });
 

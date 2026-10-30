@@ -29,11 +29,13 @@ router.post('', authenticateToken, async (req, res) => {
         request.cost_reinscription = request.offer_cost_reinscription + 1000;
         request.cost_title = request.offer_cost_title + 10000;
         request.cost_title_two = request.offer_cost_title_two + 10000;
-        const entity = await Repository.create(request, repositoryName);
+        const entity = await Repository.create(
+            request, repositoryName, { user: req.user }
+        );
         res.status(201).json(Utils.formatDates(entity));
     } catch (error) {
-        console.error(error);
-        res.status(409).json({ message: error.message });
+        console.error('courses post', error);
+        res.status(409).json({ message: 'Fallo al registrar curso' });
     }
 });
 router.get('', authenticateToken, async (req, res) => {
@@ -77,8 +79,8 @@ router.get('', authenticateToken, async (req, res) => {
         });
         res.status(200).json(entities);
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('courses get', error);
+        res.status(412).json({ message: 'Fallo al consultar curso' });
     }
 });
 router.patch('', authenticateToken, async (req, res) => {
@@ -86,11 +88,13 @@ router.patch('', authenticateToken, async (req, res) => {
         const id = req.query.id;
         const squad = await Repository.getById(req.body.squad_id, 'squads');
         req.body.image = squad.logo;
-        const entity = await Repository.update(id, req.body, repositoryName);
+        const entity = await Repository.update(
+            id, req.body, repositoryName, { user: req.user }
+        );
         res.status(200).json(Utils.formatDates(entity));
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('courses patch', error);
+        res.status(412).json({ message: 'Fallo al actualizar curso' });
     }
 });
 
@@ -104,8 +108,8 @@ router.get('/availables', async (req, res) => {
         const entities = await Repository.query(repositoryName, filters);
         res.status(200).json(entities.map(Utils.formatDates));
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('courses availables', error);
+        res.status(412).json({ message: 'Fallo al consultar cursos disponibles' });
     }
 });
 router.get('/detail', async (req, res) => {
@@ -120,8 +124,8 @@ router.get('/detail', async (req, res) => {
             adviser: adviser
         });
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('courses detail', error);
+        res.status(412).json({ message: 'Fallo al consultar detalles del curso' });
     }
 });
 
@@ -188,10 +192,8 @@ router.get('/review', authenticateToken, async (req, res) => {
         );
         res.status(200).json(review);
     } catch (error) {
-        console.error(error);
-        res.status(412).json({
-            message: error.message
-        });
+        console.error('courses review', error);
+        res.status(412).json({ message: 'Fallo al consultar la revision' });
     }
 });
 router.get('/student', authenticateToken, async (req, res) => {
@@ -215,8 +217,8 @@ router.get('/student', authenticateToken, async (req, res) => {
             phone: user.phone
         });
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('courses student', error);
+        res.status(412).json({ message: 'Fallo al consultar el alumno' });
     }
 });
 
@@ -234,8 +236,8 @@ router.patch('/change', authenticateToken, async (req, res) => {
             message: 'Estudiantes transferidos correctamente'
         });
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('courses change', error);
+        res.status(412).json({ message: 'Fallo la migracion' });
     }
 });
 

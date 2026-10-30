@@ -44,11 +44,14 @@ router.post('', authenticateToken, async (req, res) => {
             notes: [],
             jobs: []
         });
-        const newStudent = await Repository.create(studentDto, repositoryName);
+        const newStudent = await Repository.create(
+            studentDto, repositoryName, { user: req.user }
+        );
         newStudent.state = 'pending';
         await Repository.update(newStudent.id, newStudent, repositoryName);
         const user = await Repository.getById(user_id, 'users');
         if (!user.team_id) {
+            // TODO eliminar cuando todos tengan team_id
             const coordinator = await Repository.getById(course.coordinator_id, 'users');
             user.team_id = coordinator.team_id;
             await Repository.update(user_id, user, 'users');
@@ -58,8 +61,8 @@ router.post('', authenticateToken, async (req, res) => {
             user_id: newStudent.user_id
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('students post', error);
+        res.status(500).json({ message: 'Fallo al registrar alumno' });
     }
 });
 router.get('', authenticateToken, async (req, res) => {
@@ -84,18 +87,20 @@ router.get('', authenticateToken, async (req, res) => {
         }
         res.status(200).json(entities.map(entity => Repository.formatDates(entity)));
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('students get', error);
+        res.status(412).json({ message: 'Fallo al consultar alumno' });
     }
 });
 router.patch('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
-        const entity = await Repository.update(id, req.body, repositoryName);
+        const entity = await Repository.update(
+            id, req.body, repositoryName, { user: req.user }
+        );
         res.status(200).json(Utils.formatDates(entity));
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('students patch', error);
+        res.status(412).json({ message: 'Fallo al actualizar alumno' });
     }
 });
 router.delete('', authenticateToken, async (req, res) => {
@@ -110,11 +115,13 @@ router.delete('', authenticateToken, async (req, res) => {
                 await deleteFile(document.url);
             }
         });
-        await Repository.delete(id, repositoryName);
+        await Repository.delete(
+            id, repositoryName, { user: req.user }
+        );
         res.status(200).json({ message: 'Estudiante eliminado exitosamente' });
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('students delete', error);
+        res.status(412).json({ message: 'Fallo al borrar alumno' });
     }
 });
 
@@ -134,8 +141,8 @@ router.get('/courses', authenticateToken, async (req, res) => {
             image: entity.image
         })));
     } catch (error) {
-        console.error(`students courses: ${error}`);
-        res.status(412).json({ message: error.message });
+        console.error('students courses', error);
+        res.status(412).json({ message: 'Fallo al consultar los cursos del alumno' });
     }
 });
 router.get('/data', authenticateToken, async (req, res) => {
@@ -207,8 +214,8 @@ router.get('/data', authenticateToken, async (req, res) => {
             ));
         res.status(200).json(response);
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('students data', error);
+        res.status(412).json({ message: 'Fallo al consultar los datos del alumno' });
     }
 });
 router.post('/bill', authenticateToken, async (req, res) => {
@@ -246,13 +253,16 @@ router.post('/bill', authenticateToken, async (req, res) => {
             }
         }
 
-        const updatedStudent = await Repository.update(student_id, student, repositoryName);
+        await Repository.update(
+            student_id, student, repositoryName,
+            { user: req.user, description: 'save bill' }
+        );
         res.status(200).json({
             message: "Registro de pago exitoso"
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('students bill post', error);
+        res.status(500).json({ message: 'Fallo al registrar pago' });
     }
 });
 router.delete('/bill', authenticateToken, async (req, res) => {
@@ -270,13 +280,16 @@ router.delete('/bill', authenticateToken, async (req, res) => {
         }
 
         student.payments = student.payments.filter(payment => payment.id != payment_id);
-        await Repository.update(student_id, student, repositoryName)
+        await Repository.update(
+            student_id, student, repositoryName,
+            { user: req.user, description: 'delete bill' }
+        )
         res.status(200).json({
             message: "Eliminacion de pago exitoso"
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('students bill delete', error);
+        res.status(500).json({ message: 'Fallo al eliminar pago' });
     }
 });
 router.post('/document', authenticateToken, async (req, res) => {
@@ -310,13 +323,16 @@ router.post('/document', authenticateToken, async (req, res) => {
             });
         }
 
-        await Repository.update(student_id, student, repositoryName);
+        await Repository.update(
+            student_id, student, repositoryName,
+            { user: req.user, description: `Registro de documento ${type}` }
+        );
         res.status(200).json({
             message: `Registro de documento ${type} exitoso`
         });
     } catch (error) {
-        console.error(`students document request ${JSON.stringify(req.body)} error: ${error}`);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('students document post', JSON.stringify(req.body), error);
+        res.status(500).json({ message: 'Fallo al registrar documento' });
     }
 });
 router.delete('/document', authenticateToken, async (req, res) => {
@@ -342,11 +358,14 @@ router.delete('/document', authenticateToken, async (req, res) => {
             student.documents = student.documents.filter(document => document.type != type);
         }
 
-        await Repository.update(student_id, student, repositoryName)
+        await Repository.update(
+            student_id, student, repositoryName,
+            { user: req.user, description: `Eliminacion de documento ${type}` }
+        )
         res.status(200).json({ message: "Eliminacion de documento exitoso" });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('students document delete', error);
+        res.status(500).json({ message: 'Fallo al eliminar documento' });
     }
 });
 router.post('/qualification', authenticateToken, async (req, res) => {
@@ -376,7 +395,10 @@ router.post('/qualification', authenticateToken, async (req, res) => {
         student.average = student.notes.length > 0
             ? student.notes.reduce((sum, note) => sum + Number(note.value || 0), 0) / student.notes.length
             : 0;
-        const updatedStudent = await Repository.update(student_id, student, repositoryName);
+        await Repository.update(
+            student_id, student, repositoryName,
+            { user: req.user, description: 'registro de calificacion' }
+        );
 
         const course = await Repository.getById(student.course_id, 'courses');
         const content = await Repository.getById(course.content_id, 'contents');
@@ -389,8 +411,8 @@ router.post('/qualification', authenticateToken, async (req, res) => {
             finished: content.modules.length === approvedModules
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('students qualification', error);
+        res.status(500).json({ message: 'Fallo en registrar calificación' });
     }
 });
 router.post('/job-qualification', authenticateToken, async (req, res) => {
@@ -418,13 +440,16 @@ router.post('/job-qualification', authenticateToken, async (req, res) => {
             });
         }
 
-        await Repository.update(student_id, student, repositoryName);
+        await Repository.update(
+            student_id, student, repositoryName,
+            { user: req.user, description: 'registro calificacion de trabajo' }
+        );
         res.status(200).json({
-            message: "Registro de calificación exitoso"
+            message: "Registro de calificación de trabajo exitoso"
         });
     } catch (error) {
-        console.error(`student job-qualification ${JSON.stringify(req.body)} ${error}`);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('student job-qualification', JSON.stringify(req.body), error);
+        res.status(500).json({ message: 'Fallo en registrar calificación de trabajo' });
     }
 });
 router.get('/control', authenticateToken, async (req, res) => {
@@ -470,8 +495,8 @@ router.get('/control', authenticateToken, async (req, res) => {
         }
         res.status(200).json(response);
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('students control', error);
+        res.status(412).json({ message: 'Fallo al consultar el control del alumno' });
     }
 });
 
@@ -483,7 +508,7 @@ async function deleteFile(fileUrl) {
         );
         await bucket.file(filePath).delete();
     } catch (error) {
-        console.error(`Error deleting file ${fileUrl}:`, error);
+        console.error('Error deleting file', fileUrl, error);
     }
 }
 

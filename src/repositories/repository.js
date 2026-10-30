@@ -204,7 +204,7 @@ class Repository {
             };
             return ref.set(data);
         } catch (error) {
-            console.error('Error saving audit:', error);
+            console.error('Repository saving audit', error);
         }
     }
 }

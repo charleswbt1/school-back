@@ -10,11 +10,13 @@ const repositoryName = 'teams';
 router.post('', authenticateToken, async (req, res) => {
     try {
         const request = new TeamDto(req.body);
-        const entity = await Repository.create(request, repositoryName);
+        const entity = await Repository.create(
+            request, repositoryName, { user: req.user }
+        );
         res.status(201).json(Utils.formatDates(entity));
     } catch (error) {
-        console.error(error);
-        res.status(409).json({ message: error.message });
+        console.error('teams post', error);
+        res.status(409).json({ message: 'Fallo al registrar equipo' });
     }
 });
 router.get('', authenticateToken, async (req, res) => {
@@ -34,18 +36,20 @@ router.get('', authenticateToken, async (req, res) => {
         }
         res.status(200).json(entities.map(Utils.formatDates));
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('teams get', error);
+        res.status(412).json({ message: 'Fallo al consultar equipo' });
     }
 });
 router.patch('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
-        const entity = await Repository.update(id, req.body, repositoryName);
+        const entity = await Repository.update(
+            id, req.body, repositoryName, { user: req.user }
+        );
         res.status(200).json(Utils.formatDates(entity));
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('teams patch', error);
+        res.status(412).json({ message: 'Fallo al actualizar equipo' });
     }
 });
 

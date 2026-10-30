@@ -5,7 +5,7 @@ const Repository = require('../repositories/repository.js');
 
 router.post('/stripe', async (req, res) => {
     try {
-        console.log(`webhook stripe ${JSON.stringify(req.body)}`);
+        console.debug('webhook stripe', JSON.stringify(req.body));
         const event = req.body;
         if (
             event.type === "checkout.session.completed" &&
@@ -33,7 +33,7 @@ router.post('/stripe', async (req, res) => {
                 });
 
                 if (student.state === 'pending') {
-                    console.log(`webhook validate state ${payment.student_id}`);
+                    console.debug('webhook validate state', payment.student_id);
                     const totalPaid = student.payments.filter(p =>
                         p.year === payment.year && p.month === payment.month
                     ).reduce((sum, p) => sum + Number(p.amount || 0), 0);
@@ -50,7 +50,8 @@ router.post('/stripe', async (req, res) => {
         }
         res.status(200).json({ message: 'sucess' });
     } catch (error) {
-        res.status(500).json(error);
+        console.error('webhook stripe:', error);
+        res.status(200).json({ message: 'fail' });
     }
 });
 

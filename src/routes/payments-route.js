@@ -39,7 +39,8 @@ router.post('/account', authenticateToken, async (req, res) => {
             url: accountLink.url
         });
     } catch (error) {
-        res.status(500).json(error);
+        console.error('payments account', error);
+        res.status(500).json({ message: 'Fallo al generar cuenta' });
     }
 });
 router.post('/checkout', authenticateToken, async (req, res) => {
@@ -90,14 +91,13 @@ router.post('/checkout', authenticateToken, async (req, res) => {
         await Repository.create(payment, 'payments');
         res.json({ url: session.url });
     } catch (error) {
-        console.error('Stripe checkout error:', error);
+        console.error('payment checkout', error);
         res.status(500).json(error);
     }
 });
 
 router.get('/info', authenticateToken, async (req, res) => {
     const account = await stripe.accounts.retrieve("acct_1TyxJ875gm7xWle1");
-
     console.log(account.capabilities);
     console.log(account.charges_enabled);
     console.log(account.payouts_enabled);

@@ -14,11 +14,13 @@ router.post('', authenticateToken, async (req, res) => {
                 req.user.id
             ])
         ];
-        const entity = await Repository.create(request, repositoryName, { user: req.user });
+        const entity = await Repository.create(
+            request, repositoryName, { user: req.user }
+        );
         res.status(201).json(Repository.formatDates(entity));
     } catch (error) {
-        console.error(`chat conversation error: ${error}`);
-        res.status(409).json({ message: error.message });
+        console.error('chat conversation post:', error);
+        res.status(409).json({ message: 'Fallo al registar conversacion' });
     }
 });
 
@@ -44,8 +46,8 @@ router.get('', authenticateToken, async (req, res) => {
             entities.map(entity => Repository.formatDates(entity))
         );
     } catch (error) {
-        console.error(`chat conversation error: ${error}`);
-        res.status(412).json({ message: error.message });
+        console.error('chat conversation get', error);
+        res.status(412).json({ message: 'Fallo al consultar conversacion' });
     }
 });
 

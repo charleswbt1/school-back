@@ -18,10 +18,13 @@ router.post('', authenticateToken, async (req, res) => {
         if (role === 'coordinator') {
             request.coordinator_id = userId;
         }
-        const entity = await Repository.create(request, repositoryName);
+        const entity = await Repository.create(
+            request, repositoryName, { user: req.user }
+        );
         res.status(201).json(Utils.formatDates(entity));
     } catch (error) {
-        res.status(409).json({ message: error.message });
+        console.error('exams post', error);
+        res.status(409).json({ message: 'Fallo el registro del examen' });
     }
 });
 router.get('', authenticateToken, async (req, res) => {
@@ -49,25 +52,32 @@ router.get('', authenticateToken, async (req, res) => {
         }
         res.status(200).json(entities.map(Utils.formatDates));
     } catch (error) {
-        res.status(412).json({ message: error.message });
+        console.error('exams get', error);
+        res.status(412).json({ message: 'Fallo al consultar examen' });
     }
 });
 router.patch('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
-        const entity = await Repository.update(id, req.body, repositoryName);
+        const entity = await Repository.update(
+            id, req.body, repositoryName, { user: req.user }
+        );
         res.status(200).json(Utils.formatDates(entity));
     } catch (error) {
-        res.status(412).json({ message: error.message });
+        console.error('exams patch', error);
+        res.status(412).json({ message: 'Fallo al actualizar examen' });
     }
 });
 router.delete('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
-        const result = await Repository.delete(id, repositoryName);
+        const result = await Repository.delete(
+            id, repositoryName, { user: req.user }
+        );
         res.status(200).json(result);
     } catch (error) {
-        res.status(412).json({ message: error.message });
+        console.error('exams delete', error);
+        res.status(412).json({ message: 'Fallo al borrar examen' });
     }
 });
 
@@ -94,7 +104,8 @@ router.get('/questions', authenticateToken, async (req, res) => {
             theme: entity.theme
         });
     } catch (error) {
-        res.status(412).json({ message: error.message });
+        console.error('exams questions', error);
+        res.status(412).json({ message: 'Fallo al obtener preguntas' });
     }
 });
 router.post('/evaluate', authenticateToken, async (req, res) => {
@@ -123,7 +134,8 @@ router.post('/evaluate', authenticateToken, async (req, res) => {
         const approved = average >= 7;
         res.status(201).json({ score, average, approved });
     } catch (error) {
-        res.status(409).json({ message: error.message });
+        console.error('exams evaluate', error);
+        res.status(409).json({ message: 'Fallo al evaluar examen' });
     }
 });
 

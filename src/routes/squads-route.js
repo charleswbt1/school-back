@@ -10,11 +10,13 @@ const repositoryName = 'squads';
 router.post('', authenticateToken, async (req, res) => {
     try {
         const request = new SquadDto(req.body);
-        const entity = await Repository.create(request, repositoryName);
+        const entity = await Repository.create(
+            request, repositoryName, { user: req.user }
+        );
         res.status(201).json(Utils.formatDates(entity));
     } catch (error) {
-        console.error(error);
-        res.status(409).json({ message: error.message });
+        console.error('squads post', error);
+        res.status(409).json({ message: 'Fallo al registrar asociado' });
     }
 });
 router.get('', authenticateToken, async (req, res) => {
@@ -34,18 +36,20 @@ router.get('', authenticateToken, async (req, res) => {
         }
         res.status(200).json(entities.map(Utils.formatDates));
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('squads get', error);
+        res.status(412).json({ message: 'Fallo al consultar asociado' });
     }
 });
 router.patch('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
-        const entity = await Repository.update(id, req.body, repositoryName);
+        const entity = await Repository.update(
+            id, req.body, repositoryName, { user: req.user }
+        );
         res.status(200).json(Utils.formatDates(entity));
     } catch (error) {
-        console.error(error);
-        res.status(412).json({ message: error.message });
+        console.error('squads patch:', error);
+        res.status(412).json({ message: 'Fallo al actualizar asociado' });
     }
 });
 

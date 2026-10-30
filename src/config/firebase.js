@@ -20,7 +20,7 @@ function initializeFirebase() {
         bucket = admin.storage().bucket();
         return db;
     } catch (error) {
-        console.error('Error initializing Firebase:', error);
+        console.error('Error initializing Firebase', error);
         throw error;
     }
 }
