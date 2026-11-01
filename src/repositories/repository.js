@@ -191,8 +191,9 @@ class Repository {
     saveAudit(trace, repositoryName, event, registerId) {
         try {
             if (!trace) { return; }
-            const ref = this.getCollection('audits').doc();
+
             const data = {
+                id: `AUD_${Date.now()}`,
                 team_id: trace.user.team_id,
                 user_id: trace.user.id,
                 event: event,
@@ -202,6 +203,7 @@ class Repository {
                 createdAt: new Date(),
                 updatedAt: new Date()
             };
+            const ref = this.getCollection('audits').doc(data.id);
             return ref.set(data);
         } catch (error) {
             console.error('Repository saving audit', error);

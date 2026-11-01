@@ -128,13 +128,33 @@ router.post('/logout', (req, res) => {
     });
 });
 router.post('/password', authenticateToken, async (req, res) => {
-    const { user_id, new_password } = req.body;
+    const { new_password } = req.body;
     try {
-        const pass = await bcrypt.hash(req.body.new_password, 10);
+        const pass = await bcrypt.hash(new_password, 10);
+        const user = await Repository.getById(req.user.id, repositoryName);
+        user.password = pass;
+        await Repository.update(
+            user.id, user, repositoryName,
+            { user: req.user, description: 'change password' }
+        );
+        res.status(200).json({ role: user.role, user_id: user.id, message: 'Contraseña actualizada' });
+    } catch (error) {
+        console.error('users password', error);
+        res.status(500).json({ message: 'Fallo al actualizar contraseña' });
+    }
+});
+router.post('/reset-password', authenticateToken, async (req, res) => {
+    const { user_id, nick_name } = req.body;
+    try {
+        if (req.user.role != 'coordinator') {
+            res.status(409).json({ message: 'Sin autorizacion' });
+        }
+        const pass = await bcrypt.hash(nick_name, 10);
         const user = await Repository.getById(user_id, repositoryName);
         user.password = pass;
         await Repository.update(
-            user_id, user, repositoryName, { user: req.user }
+            user_id, user, repositoryName,
+            { user: req.user, description: 'reset password' }
         );
         res.status(200).json({ role: user.role, user_id: user.id });
     } catch (error) {
