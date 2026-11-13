@@ -31,7 +31,10 @@ router.post('', authenticateToken, async (req, res) => {
         if (curp.length > 0) {
             throw new Error(`El CURP ${request.curp} ya está registrado para el rol ${request.role} nick_name ${curp[0].nick_name}`);
         }
-
+        if (!request.team_id) {
+            const user = await Repository.getById(req.user.id, repositoryName);
+            request.team_id = user.team_id;
+        }
         const entity = await Repository.create(
             request, repositoryName, { user: req.user }
         );

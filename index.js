@@ -9,8 +9,7 @@ const port = process.env.PORT || 3000;
 
 const allowedOrigins = [
   'http://localhost:3001',
-  'https://iuc-conecta.com',
-  'https://school-web-764239827508.us-east1.run.app'
+  'https://iuc-conecta.com'
 ];
 
 const corsOptions = {
@@ -39,6 +38,10 @@ fs.readdirSync(routesPath)
     const route = require(path.join(routesPath, file));
     app.use(`/api/${routeName}`, route);
   });
+
+app.get('', (req, res) => {
+  res.status(200).json({ message: 'API is running' });
+});
 
 app.listen(port, () => {
   console.log(`🚀 Server running on port ${port}`);

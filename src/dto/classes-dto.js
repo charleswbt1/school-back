@@ -1,43 +1,20 @@
-class MediaDto {
+class MediaClassDto {
     constructor({
+        id,
         link,
+        name,
         date,
-        time
-    }) {
-        this.link = link;
-        this.date = date;
-        this.time = time;
-    }
-}
-class MaterialDto {
-    constructor({
-        id,
-        link,
-        name,
-        description
-    }) {
-        this.id = id || `MAT_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-        this.link = link;
-        this.name = name;
-        this.description = description;
-    }
-}
-class JobClassDto {
-    constructor({
-        id,
-        link,
-        name,
         description,
         delivery_date,
     }) {
-        this.id = id || `JOB_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+        this.id = id || `MEDIA_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
         this.link = link;
         this.name = name;
+        this.date = date;
         this.description = description;
         this.delivery_date = delivery_date;
     }
 }
-
 class ClassesDto {
     constructor({
         course_id,
@@ -52,14 +29,9 @@ class ClassesDto {
         this.content_id = content_id;
         this.module_id = module_id;
         this.teacher_id = teacher_id;
-        this.medias = medias.map(
-            media => {
-                media.time = new Date(`${media.date}T12:00:00`);
-                return new MediaDto(media);
-            }
-        );
-        this.materials = materials.map(material => new MaterialDto(material));
-        this.jobs = jobs.map(job => new JobClassDto(job));
+        this.medias = medias.map(media => new MediaClassDto(media));
+        this.materials = materials.map(material => new MediaClassDto(material));
+        this.jobs = jobs.map(job => new MediaClassDto(job));
     }
 }
 

@@ -2,13 +2,11 @@ class Topic {
     constructor({
         id,
         name,
-        description,
-        link
+        description
     }) {
         this.id = id || `TOP_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
         this.name = name;
         this.description = description;
-        this.link = link;
     }
 }
 
