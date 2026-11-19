@@ -55,4 +55,16 @@ router.post('/stripe', async (req, res) => {
     }
 });
 
+router.get('/fix', async (req, res) => {
+    const result = await Repository.query('contents', [
+        ['state', '==', 'active']
+    ]);
+    const response = result.filter(content =>
+        content.modules.some(module =>
+            module.link && module.link != 'undefined'
+        )
+    );
+    res.status(200).json({ message: 'Webhook info', size: response.length, data: response });
+});
+
 module.exports = router;

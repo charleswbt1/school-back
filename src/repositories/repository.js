@@ -188,7 +188,7 @@ class Repository {
         return data;
     }
 
-    saveAudit(trace, repositoryName, event, registerId) {
+    async saveAudit(trace, repositoryName, event, registerId) {
         try {
             if (!trace) { return; }
 
@@ -204,7 +204,7 @@ class Repository {
                 updatedAt: new Date()
             };
             const ref = this.getCollection('audits').doc(data.id);
-            return ref.set(data);
+            await ref.set(data);
         } catch (error) {
             console.error('Repository saving audit', error);
         }

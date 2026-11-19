@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
@@ -71,9 +70,9 @@ router.get('', authenticateToken, async (req, res) => {
 });
 router.patch('', authenticateToken, async (req, res) => {
     try {
-        const id = req.user.id;
+        const id = req.query.id;
         const entity = await Repository.update(
-            id, req.body, repositoryName, { user: req.user }
+            id, new UserDto(req.body), repositoryName, { user: req.user }
         );
         res.status(200).json(Utils.formatDates(entity));
     } catch (error) {

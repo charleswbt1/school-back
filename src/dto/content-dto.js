@@ -34,16 +34,16 @@ class Module {
 
 class ContentDto {
     constructor({
+        coordinator_id,
         name,
         description,
         state,
-        coordinator_id,
         modules = []
     }) {
+        this.coordinator_id = coordinator_id;
         this.name = name;
         this.description = description;
         this.state = state;
-        this.coordinator_id = coordinator_id;
         this.modules = modules.map(
             module => new Module(module)
         );
