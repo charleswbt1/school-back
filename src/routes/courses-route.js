@@ -134,7 +134,7 @@ router.get('/review', authenticateToken, async (req, res) => {
         const { year, month, team } = req.query;
         const coordinators = await Repository.query('users', [
             ['role', '==', 'coordinator'],
-            ['team_id', '==', team]
+            ['team_id', '==', req.user.team_id]
         ]);
         const review = await Promise.all(
             coordinators.map(async coordinator => {

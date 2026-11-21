@@ -132,6 +132,9 @@ router.post('/evaluate', authenticateToken, async (req, res) => {
 
         const average = Number(((score / exam.questions.length) * 10).toFixed(1));
         const approved = average >= 7;
+        await Repository.saveAudit(
+            { user: req.user }, 'exam', 'evaluate', request.exam_id
+        );
         res.status(201).json({ score, average, approved });
     } catch (error) {
         console.error('exams evaluate', error);

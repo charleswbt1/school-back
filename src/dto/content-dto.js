@@ -17,7 +17,6 @@ class Module {
         description,
         qualification,
         available,
-        link,
         topics = []
     }) {
         this.id = id || `MOD_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
@@ -25,7 +24,6 @@ class Module {
         this.description = description;
         this.qualification = qualification;
         this.available = available;
-        this.link = link;
         this.topics = topics.map(
             topic => new Topic(topic)
         );

@@ -52,7 +52,7 @@ router.patch('', authenticateToken, async (req, res) => {
     try {
         const id = req.query.id;
         const entity = await Repository.update(
-            id, req.body, repositoryName, { user: req.user }
+            id, new ClassesDto(req.body), repositoryName, { user: req.user }
         );
         res.status(200).json(Utils.formatDates(entity));
     } catch (error) {
